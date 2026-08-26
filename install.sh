@@ -23,7 +23,7 @@
 
 set -uo pipefail
 
-VERSION="2.5"
+VERSION="2.6"
 LOG="/var/log/mailserver-install.log"
 DIR="/opt/mailserver"
 
