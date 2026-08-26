@@ -1,10 +1,10 @@
 # Записи DNS для почтового сервера
-# Замените example.com, mail.example.com и 1.1.1.1 на свои.
+# Замените example.com, mail.example.com и 203.0.113.10 на свои.
 # Имена указаны с точкой на конце — так их принимает большинство панелей.
 
 # ── до установки ─────────────────────────────────────────────────────────
 # Нужна для выпуска сертификата Let's Encrypt.
-A       mail.example.com.              1.1.1.1
+A       mail.example.com.              203.0.113.10
 
 # ── после установки ──────────────────────────────────────────────────────
 # Куда доставлять почту для домена.
@@ -25,12 +25,12 @@ TXT     mail._domainkey.example.com.   "v=DKIM1; k=rsa; p=MIIBIjANBgkq..."
 
 # ── не в DNS домена ──────────────────────────────────────────────────────
 # PTR живёт в обратной зоне IP и принадлежит хостеру.
-# Просить так: «Прошу настроить PTR для 1.1.1.1 на mail.example.com».
-# PTR   1.1.1.1       →  mail.example.com.
+# Просить так: «Прошу настроить PTR для 203.0.113.10 на mail.example.com».
+# PTR   203.0.113.10       →  mail.example.com.
 
 # ── проверка ─────────────────────────────────────────────────────────────
 # dig +short MX example.com
 # dig +short TXT example.com
 # dig +short TXT mail._domainkey.example.com
-# dig +short -x 1.1.1.1
+# dig +short -x 203.0.113.10
 # dig +short mail.example.com
