@@ -1,36 +1,36 @@
 # Записи DNS для почтового сервера
-# Замените protestant.ru, mail.protestant.ru и 186.246.51.250 на свои.
+# Замените example.com, mail.example.com и 1.1.1.1 на свои.
 # Имена указаны с точкой на конце — так их принимает большинство панелей.
 
 # ── до установки ─────────────────────────────────────────────────────────
 # Нужна для выпуска сертификата Let's Encrypt.
-A       mail.protestant.ru.              186.246.51.250
+A       mail.example.com.              1.1.1.1
 
 # ── после установки ──────────────────────────────────────────────────────
 # Куда доставлять почту для домена.
-MX      protestant.ru.                   mail.protestant.ru.     приоритет 10
+MX      example.com.                   mail.example.com.     приоритет 10
 
 # Кому разрешено отправлять от имени домена.
 # ~all — мягкий режим: чужие письма помечаются, но не отвергаются.
 # После месяца наблюдений можно ужесточить до -all.
-TXT     protestant.ru.                   "v=spf1 mx ~all"
+TXT     example.com.                   "v=spf1 mx ~all"
 
 # Отчёты о проверках. p=none — только собирать статистику.
 # Через месяц можно перевести в p=quarantine.
-TXT     _dmarc.protestant.ru.            "v=DMARC1; p=none; rua=mailto:postmaster@protestant.ru"
+TXT     _dmarc.example.com.            "v=DMARC1; p=none; rua=mailto:postmaster@example.com"
 
 # Подпись писем. Значение выдаёт установщик; вставлять одной строкой,
 # без переносов. Если панель сама ставит кавычки — свои не добавлять.
-TXT     mail._domainkey.protestant.ru.   "v=DKIM1; k=rsa; p=MIIBIjANBgkq..."
+TXT     mail._domainkey.example.com.   "v=DKIM1; k=rsa; p=MIIBIjANBgkq..."
 
 # ── не в DNS домена ──────────────────────────────────────────────────────
 # PTR живёт в обратной зоне IP и принадлежит хостеру.
-# Просить так: «Прошу настроить PTR для 186.246.51.250 на mail.protestant.ru».
-# PTR   186.246.51.250       →  mail.protestant.ru.
+# Просить так: «Прошу настроить PTR для 1.1.1.1 на mail.example.com».
+# PTR   1.1.1.1       →  mail.example.com.
 
 # ── проверка ─────────────────────────────────────────────────────────────
-# dig +short MX protestant.ru
-# dig +short TXT protestant.ru
-# dig +short TXT mail._domainkey.protestant.ru
-# dig +short -x 186.246.51.250
-# dig +short mail.protestant.ru
+# dig +short MX example.com
+# dig +short TXT example.com
+# dig +short TXT mail._domainkey.example.com
+# dig +short -x 1.1.1.1
+# dig +short mail.example.com
