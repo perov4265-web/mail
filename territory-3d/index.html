@@ -52,8 +52,9 @@
   <label><input type="checkbox" id="cbCarport" checked> Навесы (зона A)</label>
   <label><input type="checkbox" id="cbGabion" checked> Габионы 1000×600</label>
   <label><input type="checkbox" id="cbSigns" checked> Дорожные знаки на стойках</label>
+  <label><input type="checkbox" id="cbDetail" checked> АБК-1 и АБК-2 детально (стены, окна, мебель, фермы)</label>
   <hr>
-  <button id="bTop">Вид сверху</button><button id="bIso">Общий вид</button><button id="bPark">К парковке</button>
+  <button id="bTop">Вид сверху</button><button id="bIso">Общий вид</button><button id="bPark">К парковке</button><button id="bAbk1">К АБК-1</button><button id="bAbk2">К АБК-2</button>
   <hr>
   <div class="legend">
     <span class="sw" style="background:#d98f7a"></span><span>Здания (АБК, столовые, лаборатория)</span>
@@ -79,9 +80,11 @@
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { buildDetailedBuilding } from './js/building.js';
 
 const DATA_URL = 'data/site.json';
 const site = await (await fetch(DATA_URL)).json();
+const abks = (await Promise.all(['data/abk1.json', 'data/abk2.json'].map(u => fetch(u).then(r => r.ok ? r.json() : null).catch(() => null)))).filter(Boolean);
 const T = site.meta.texture;
 const W = T.x1 - T.x0, H = T.y1 - T.y0;
 const cx = W/2, cy = H/2;
@@ -168,6 +171,17 @@ site.points.forEach(p => { const m = new THREE.Mesh(new THREE.CylinderGeometry(1
   m.position.copy(v3(p.pos, 0.25)); G('bld').add(m); m.userData = p; bldMeshes.push(m); G('labels').add(label(p.id, p.pos, 0x223355, 2.6, 1.4)); });
 site.zones.forEach(z => { const m = prism(z.polygon, 0.1, new THREE.MeshLambertMaterial({color:0xa7c4a0, transparent:true, opacity:0.7})); m.userData=z; bldMeshes.push(m); G('bld').add(m); });
 function setVolumes(on){ site.buildings.forEach((b,i)=>{ const m = bldMeshes[i]; const h = on ? b.height_m : 0.4; m.scale.y = h/0.4; }); }
+
+// ---------- detailed buildings (АБК-1 from DWG, АБК-2 from PDFs) ----------
+const detailed = {};
+abks.forEach(abk => {
+  const fb = site.buildings.find(b => b.id === (abk.placement && abk.placement.building)); if(!fb) return;
+  const wrap = buildDetailedBuilding(abk, fb.footprint, {label});
+  wrap.traverse(o => { if(o.isMesh){ o.userData = wrap.userData; bldMeshes.push(o); } });
+  G('detail').add(wrap); detailed[fb.id] = wrap;
+});
+function setDetail(on){ groups.detail.visible = on; site.buildings.forEach((b,i) => { if(detailed[b.id]) bldMeshes[i].visible = !on; }); }
+setDetail(true);
 
 // ---------- fences ----------
 function fenceLine(pts, h, color){
@@ -292,7 +306,10 @@ function centroid(poly){ let A=0,X=0,Y=0; for(let i=0;i<poly.length;i++){ const 
 // ---------- UI ----------
 const bind = (id, grp, fn) => document.getElementById(id).addEventListener('change', e => { if(grp) groups[grp].visible = e.target.checked; if(fn) fn(e.target.checked); });
 bind('cbPlan', null, applyPlan); bind('cbCurbs','curbs'); bind('cbBld','bld'); bind('cbVol', null, setVolumes); bind('cbLabels','labels');
-bind('cbFence','fence'); bind('cbPark','park'); bind('cbCarport','carport'); bind('cbGabion','gabion'); bind('cbSigns','signs');
+bind('cbFence','fence'); bind('cbPark','park'); bind('cbCarport','carport'); bind('cbGabion','gabion'); bind('cbSigns','signs'); bind('cbDetail', null, setDetail);
+function flyToBuilding(id, dist){ const b = site.buildings.find(x => x.id === id); if(!b) return; const c = centroid(b.footprint); flyTo(new THREE.Vector3(c[0]+dist, dist*0.6, -c[1]+dist), new THREE.Vector3(c[0], 1.5, -c[1])); }
+document.getElementById('bAbk1').onclick = () => flyToBuilding('1', 38);
+document.getElementById('bAbk2').onclick = () => flyToBuilding('2.1', 45);
 document.getElementById('tbtn').onclick = () => document.getElementById('panel').classList.toggle('open');
 const notes = document.getElementById('notes');
 [site.meta.scale_note, site.meta.axes, 'Высоты зданий — предварительные, для режима «Объёмы».', site.carports[0].note, site.gabions[0].note + ` По ${site.gabions[0].count} шт. (${site.gabions[0].length_m} м) в каждом ряду.`,
@@ -302,7 +319,7 @@ const qs = new URLSearchParams(location.search); if(qs.get('cam') && qs.get('at'
 document.getElementById('bTop').onclick = () => flyTo(new THREE.Vector3(cx, 560, -cy+0.01), new THREE.Vector3(cx,0,-cy));
 document.getElementById('bIso').onclick = () => flyTo(new THREE.Vector3(cx-190, 210, -cy+330), new THREE.Vector3(cx,0,-cy));
 document.getElementById('bPark').onclick = () => { const c = centroid(site.parking.lot); flyTo(new THREE.Vector3(c[0]+48, 22, -c[1]-40), new THREE.Vector3(c[0]-4, 1, -c[1])); };
-({top:'bTop', park:'bPark'}[new URLSearchParams(location.search).get('view')] ? document.getElementById({top:'bTop', park:'bPark'}[new URLSearchParams(location.search).get('view')]) : document.getElementById('bIso')).onclick();
+({top:'bTop', park:'bPark', abk1:'bAbk1', abk2:'bAbk2'}[new URLSearchParams(location.search).get('view')] ? document.getElementById({top:'bTop', park:'bPark', abk1:'bAbk1', abk2:'bAbk2'}[new URLSearchParams(location.search).get('view')]) : document.getElementById('bIso')).onclick();
 
 // click -> info
 const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(); const info = document.getElementById('info');
