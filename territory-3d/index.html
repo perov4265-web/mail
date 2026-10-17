@@ -360,9 +360,10 @@ function startWalk(){
   camera.position.set(b.start.x, 1.6, b.start.z); walk.yaw = Math.atan2(b.lookAt.x - b.start.x, -(b.lookAt.z - b.start.z)); walk.pitch = 0;
   walkUI.hidden = false; bExit.hidden = false; document.getElementById('info').style.display = 'none';
   walk.labels = groups.labels.visible; groups.labels.visible = false;
+  groups.detail.traverse(o => { if(o.isSprite) o.visible = false; });
   setRoofs(true); // the painted ceiling needs the roof group
 }
-function stopWalk(){ walk.on = false; walkUI.hidden = true; bExit.hidden = true; controls.enabled = true; groups.labels.visible = walk.labels !== false; document.getElementById('bAbk2').onclick(); }
+function stopWalk(){ walk.on = false; walkUI.hidden = true; bExit.hidden = true; controls.enabled = true; groups.labels.visible = walk.labels !== false; groups.detail.traverse(o => { if(o.isSprite) o.visible = true; }); document.getElementById('bAbk2').onclick(); }
 document.getElementById('bTemple').onclick = startWalk; bExit.onclick = stopWalk;
 addEventListener('keydown', e => { if(!walk.on) return; if(e.key === 'Escape') return stopWalk(); walk.keys[e.key.toLowerCase()] = true; if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(e.key.toLowerCase())) e.preventDefault(); });
 addEventListener('keyup', e => { walk.keys[e.key.toLowerCase()] = false; });

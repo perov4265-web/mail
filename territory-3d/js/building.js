@@ -219,7 +219,7 @@ export function buildDetailedBuilding(abk, footprint, opts = {}) {
     wrap.userData = {id: abk.id, name: abk.name, size_m: abk.size_m, note: (abk.notes || []).join(' ')};
     if (g.userData.temple) { wrap.updateMatrixWorld(true); const T = g.userData.templeLocal; const pts = [[T.x0, T.y0], [T.x1, T.y0], [T.x1, T.y1], [T.x0, T.y1]].map(([x, y]) => new THREE.Vector3(x, 0, -y).applyMatrix4(g.matrixWorld));
       const side = T.altar_side || 'x1', sd = T.sanctuary_depth || 3, mx = (T.x0 + T.x1) / 2, my = (T.y0 + T.y1) / 2;
-      const nave = side === 'x1' ? [T.x0 + (T.x1 - T.x0 - sd) / 2, my] : side === 'x0' ? [T.x1 - (T.x1 - T.x0 - sd) / 2, my] : side === 'y1' ? [mx, T.y0 + (T.y1 - T.y0 - sd) / 2] : [mx, T.y1 - (T.y1 - T.y0 - sd) / 2];
+      const nave = side === 'x1' ? [T.x0 + (T.x1 - T.x0 - sd) * 0.3, my] : side === 'x0' ? [T.x1 - (T.x1 - T.x0 - sd) * 0.3, my] : side === 'y1' ? [mx, T.y0 + (T.y1 - T.y0 - sd) * 0.3] : [mx, T.y1 - (T.y1 - T.y0 - sd) * 0.3];
       const ico = side === 'x1' ? [T.x1 - sd, my] : side === 'x0' ? [T.x0 + sd, my] : side === 'y1' ? [mx, T.y1 - sd] : [mx, T.y0 + sd];
       const W = ([x, y]) => new THREE.Vector3(x, 0, -y).applyMatrix4(g.matrixWorld);
       wrap.userData.templeWorld = {xmin: Math.min(...pts.map(p => p.x)), xmax: Math.max(...pts.map(p => p.x)), zmin: Math.min(...pts.map(p => p.z)), zmax: Math.max(...pts.map(p => p.z)), h: T.wall_h, start: W(nave), lookAt: W(ico)}; }
