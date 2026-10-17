@@ -1,0 +1,10 @@
+{
+ "park_aerial": {
+  "request_id": 55899656,
+  "status": "success",
+  "model": "nano-banana-2",
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792231971_6ad34a234be15.jpg",
+  "cost": 20,
+  "runtime": 16.79
+ }
+}
