@@ -278,8 +278,13 @@ site.gabions.forEach(gb => {
   const dir = b.clone().sub(a); const len = dir.length(); dir.normalize(); const n = gb.count || Math.ceil(len/L);
   const mat = new THREE.MeshStandardMaterial({map:gabTex, roughness:0.95, metalness:0.05});
   const geo = new THREE.BoxGeometry(L, Hh, Wd);
-  for(let t=0;t<gb.tiers;t++) for(let i=0;i<n;i++){
-    const m = new THREE.Mesh(geo, mat); m.position.copy(a.clone().add(dir.clone().multiplyScalar((i+0.5)*L))); m.position.y = Hh*(t+0.5);
+  // segments of `segment_m` with `gap_m` clear between them, centred on the line; without these fields — a continuous wall
+  const seg = gb.segment_m || len, gap = gb.gap_m || 0, perSeg = Math.max(1, Math.round(seg / L)), nSeg = gb.segments || Math.max(1, Math.floor((len + gap) / (seg + gap)));
+  const margin = gb.margin_m !== undefined ? gb.margin_m : (len - (nSeg * seg + (nSeg - 1) * gap)) / 2;
+  const starts = gb.offsets_m || Array.from({length:nSeg}, (_, sgi) => margin + sgi*(seg+gap));   // explicit section starts win over the regular rhythm
+  const offs = []; starts.forEach(s0 => { for(let k=0; k<perSeg; k++) offs.push(s0 + (k+0.5)*L); });
+  for(let t=0;t<gb.tiers;t++) for(const off of offs){
+    const m = new THREE.Mesh(geo, mat); m.position.copy(a.clone().add(dir.clone().multiplyScalar(off))); m.position.y = Hh*(t+0.5);
     m.rotation.y = -Math.atan2(dir.z, dir.x); m.castShadow = m.receiveShadow = true; m.userData = gb; bldMeshes.push(m); G('gabion').add(m);
     const e = new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({color:0xbfc3c7})); m.add(e);
   }

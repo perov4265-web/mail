@@ -226,8 +226,30 @@ export function buildTemple(T) {
   const colH = y => (T.topAt ? T.topAt(y - y0) : H) + 0.1;
   const fluted = new THREE.MeshLambertMaterial({map: tex(256, 64, (x, w, h) => { x.fillStyle = '#efe9dc'; x.fillRect(0, 0, w, h); for (let i = 0; i < w; i += 32) { x.fillStyle = '#d8d0bf'; x.fillRect(i, 0, 8, h); x.fillStyle = '#f8f5ee'; x.fillRect(i + 8, 0, 6, h); } }, [6, 1])});
   const marble = new THREE.MeshStandardMaterial({color: 0xcfc6b8, roughness: 0.3, metalness: 0.05});
+  // carved oak brackets (косынки) under the truss on both sides of the column, in the plane of the truss
+  const CARVED = new THREE.MeshLambertMaterial({map: tex(256, 256, (c, w, h) => {
+    c.fillStyle = '#b98c52'; c.fillRect(0, 0, w, h);
+    for (let i = 0; i < 6; i++) { c.strokeStyle = i % 2 ? '#8a6238' : '#d8b074'; c.lineWidth = 7 - i % 2 * 3; c.beginPath();
+      c.arc(w * 0.5 + (i % 2 ? 4 : 0), h * 0.5, 30 + i * 16, 0.3 + i * 0.4, 3.6 + i * 0.4); c.stroke(); }
+    for (let k = 0; k < 10; k++) { const ax = (k * 97) % w, ay = (k * 61) % h; c.fillStyle = '#8a6238'; c.beginPath(); c.ellipse(ax, ay, 12, 5, k, 0, 7); c.fill(); c.fillStyle = '#d8b074'; c.beginPath(); c.ellipse(ax + 3, ay - 2, 7, 2.5, k, 0, 7); c.fill(); }
+  }, [3, 3])});
+  const bracket = (x, y, colW) => {   // 40 mm openwork (ажурные) brackets: ogee outline pierced with round and slot openings
+    const top = chord - 0.12, hb = 0.75, lb = 0.6;
+    [1, -1].forEach(sgn => {
+      const sh = new THREE.Shape(); sh.moveTo(0, 0); sh.lineTo(lb, 0); sh.lineTo(lb, -0.06);
+      sh.bezierCurveTo(lb * 0.7, -0.08, lb * 0.5, -hb * 0.15, lb * 0.42, -hb * 0.3);   // ogee: convex shoulder
+      sh.bezierCurveTo(lb * 0.3, -hb * 0.55, lb * 0.12, -hb * 0.7, 0.07, -hb);          // then concave sweep to the column
+      sh.lineTo(0, -hb); sh.closePath();
+      [[0.09, -0.09, 0.045], [0.2, -0.07, 0.033], [0.31, -0.05, 0.022], [0.08, -0.22, 0.04], [0.17, -0.17, 0.028], [0.06, -0.36, 0.03], [0.055, -0.5, 0.024], [0.045, -0.62, 0.018]]
+        .forEach(([hx, hy, r]) => { const hole = new THREE.Path(); hole.absellipse(hx, hy, r, r * 1.25, 0, Math.PI * 2, true); sh.holes.push(hole); });
+      const geo = new THREE.ExtrudeGeometry(sh, {depth: 0.04, bevelEnabled: true, bevelThickness: 0.004, bevelSize: 0.004, bevelSegments: 1, curveSegments: 10});
+      geo.rotateY(sgn * Math.PI / 2);   // shape X -> outward along the truss, extrusion along world x
+      const m = new THREE.Mesh(geo, CARVED); m.position.set(x - sgn * 0.02, top, -y - sgn * colW / 2); m.castShadow = true; g.add(m);
+    });
+  };
   (T.columns || []).forEach(([x, y]) => {
     const h = colH(y);
+    bracket(x, y, {wood:0.32, wood_open:0.32, wood_glass:0.32, icons:0.36, icons_painted:0.36, stucco:0.34, ceiling:0.34}[F] || 0.22);   // carved brackets in every finish, width = column width
     if (F === 'wood' || F === 'wood_open' || F === 'wood_glass') {            // oak casing with plinth and capital
       g.add(box(0.32, h, 0.32, WOOD2, x, h / 2, -y)); g.add(box(0.46, 0.3, 0.46, WOOD, x, 0.15, -y)); g.add(box(0.46, 0.18, 0.46, WOOD, x, h - 0.09, -y)); g.add(box(0.4, 0.04, 0.4, GOLD, x, h - 0.2, -y));
     } else if (F === 'icons' || F === 'icons_painted') {    // oak casing carrying icons on four sides, gilded cornice
@@ -327,7 +349,8 @@ export function buildTemple(T) {
   place(golgotha(), nearU - dir * 1.2, V0 + 0.9, altarAtU1 ? Math.PI / 2 : -Math.PI / 2);
   // lecterns (analoy) and candle stands in the nave in front of the solea
   [[icU + dir * 3.0, cv - 2.5], [icU + dir * 3.0, cv + 2.5], [icU + dir * 5.0, cv]].forEach(([u, v]) => place(lectern(), u, v, altarAtU1 ? Math.PI / 2 : -Math.PI / 2));
-  [[icU + dir * 2.2, cv - 1.0], [icU + dir * 2.2, cv + 1.0], [icU + dir * 4.0, V0 + 2.6]].forEach(([u, v]) => place(candleStand(), u, v));
+  // candle stands at the solea edge, 1.5 m from the iconostasis: clear of the column row that stands 2.25 m from it
+  [[icU + dir * 1.5, cv - 1.0], [icU + dir * 1.5, cv + 1.0], [icU + dir * 4.0, V0 + 2.6]].forEach(([u, v]) => place(candleStand(), u, v));
   // interior lighting (no shadows) so the painted room reads under the roof
   for (let i = 1; i <= 3; i++) { const p = new THREE.PointLight(0xfff2dc, 14, 14, 1.4); p.position.set(x0 + Lx * i / 4, 2.9, -(y0 + Ly / 2)); g.add(p); }
   g.userData = {id: 'Храм', name: 'Храм (оси 12–17): иконостас, солея, стасидии, аналои, подсвечники, Голгофа', note: 'Мебель и роспись восстановлены по фотосъёмке; размеры мебели типовые, расстановка — по фото'};
