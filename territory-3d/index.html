@@ -392,7 +392,9 @@ const notes = document.getElementById('notes');
 [site.meta.scale_note, site.meta.axes, 'Высоты зданий — предварительные, для режима «Объёмы».', site.carports[0].note, site.gabions[0].note + ` ${site.gabions[0].count} шт., ${site.gabions[0].length_m} м.`,
  `Зона A — ${site.parking.zones[0].stalls.length} мест (ближе к КПП 10.1), зона B — ${site.parking.zones[1].stalls.length} мест; граница смещается в site.json.`, site.signs.note].forEach(t => { const li = document.createElement('li'); li.textContent = t; notes.appendChild(li); });
 function flyTo(pos, target){ camera.position.copy(pos); controls.target.copy(target); controls.update(); }
-const qs = new URLSearchParams(location.search); if(qs.get('cam') && qs.get('at')){ const n = s => s.split(',').map(Number); setTimeout(() => flyTo(new THREE.Vector3(...n(qs.get('cam'))), new THREE.Vector3(...n(qs.get('at')))), 0); }
+const qs = new URLSearchParams(location.search);
+if(qs.get('ui') === '0'){ document.getElementById('panel').style.display = 'none'; document.getElementById('toggle').style.display = 'none'; setTimeout(() => { groups.labels.visible = false; groups.detail.traverse(o => { if(o.isSprite) o.visible = false; }); scene.traverse(o => { if(o.isSprite) o.visible = false; }); document.getElementById('walk').hidden = true; }, 0); }
+if(qs.get('cam') && qs.get('at')){ const n = s => s.split(',').map(Number); setTimeout(() => flyTo(new THREE.Vector3(...n(qs.get('cam'))), new THREE.Vector3(...n(qs.get('at')))), 0); }
 document.getElementById('bTop').onclick = () => flyTo(new THREE.Vector3(cx, 560, -cy+0.01), new THREE.Vector3(cx,0,-cy));
 document.getElementById('bIso').onclick = () => flyTo(new THREE.Vector3(cx-190, 210, -cy+330), new THREE.Vector3(cx,0,-cy));
 document.getElementById('bPark').onclick = () => { const c = centroid(site.parking.lot); flyTo(new THREE.Vector3(c[0]+48, 22, -c[1]-40), new THREE.Vector3(c[0]-4, 1, -c[1])); };
