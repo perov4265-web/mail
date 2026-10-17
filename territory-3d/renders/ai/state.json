@@ -6,5 +6,23 @@
   "url": "https://gen-api.storage.yandexcloud.net/input_files/1792231971_6ad34a234be15.jpg",
   "cost": 20,
   "runtime": 16.79
+ },
+ "park_aisle": {
+  "request_id": 55900318,
+  "status": "processing",
+  "model": "nano-banana-2",
+  "submit": null
+ },
+ "park_gate": {
+  "request_id": 55900321,
+  "status": "processing",
+  "model": "nano-banana-2",
+  "submit": null
+ },
+ "park_gabion": {
+  "request_id": 55900322,
+  "status": "processing",
+  "model": "nano-banana-2",
+  "submit": null
  }
 }
