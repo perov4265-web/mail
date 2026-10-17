@@ -194,7 +194,7 @@ export function buildDetailedBuilding(abk, footprint, opts = {}) {
     const side = T.altar_side || 'x1'; const wallAt = side === 'x0' ? T.x0 : side === 'x1' ? T.x1 : side === 'y0' ? T.y0 : T.y1; const alongX = side === 'y0' || side === 'y1';
     T.openings = (abk.doors || []).filter(d => { const r = walls[d.wall].rect; const c = alongX ? (r[1] + r[3]) / 2 : (r[0] + r[2]) / 2; return d.axis === (alongX ? 'x' : 'y') && Math.abs(c - wallAt) < 0.3; }).map(d => [d.from, d.to]);
     if (roof.type === 'gable') { const e = roof.eave, r = roof.ridge; T.topAt = y => e - 0.12 + (r - e) * (1 - Math.abs(y - Ly / 2) / (Ly / 2)); T.chord = roof.bottom_chord || H; T.truss_pitch = (roof.truss && roof.truss.pitch) || 3.1; T.trussMat = g.userData.trussMat; }
-    g.add(buildTemple(T));
+    const tg = buildTemple(T); g.add(tg); g.userData.temple = tg; g.userData.templeLocal = T;
   }
   // extras
   (abk.extras || []).forEach(e => {
@@ -217,6 +217,12 @@ export function buildDetailedBuilding(abk, footprint, opts = {}) {
     g.position.set(-Lx / 2, 0, Ly / 2);          // centre the local model
     wrap.add(g); wrap.rotation.y = THREE.MathUtils.degToRad(rot); wrap.position.set(cx, 0.02, -cy);
     wrap.userData = {id: abk.id, name: abk.name, size_m: abk.size_m, note: (abk.notes || []).join(' ')};
+    if (g.userData.temple) { wrap.updateMatrixWorld(true); const T = g.userData.templeLocal; const pts = [[T.x0, T.y0], [T.x1, T.y0], [T.x1, T.y1], [T.x0, T.y1]].map(([x, y]) => new THREE.Vector3(x, 0, -y).applyMatrix4(g.matrixWorld));
+      const side = T.altar_side || 'x1', sd = T.sanctuary_depth || 3, mx = (T.x0 + T.x1) / 2, my = (T.y0 + T.y1) / 2;
+      const nave = side === 'x1' ? [T.x0 + (T.x1 - T.x0 - sd) / 2, my] : side === 'x0' ? [T.x1 - (T.x1 - T.x0 - sd) / 2, my] : side === 'y1' ? [mx, T.y0 + (T.y1 - T.y0 - sd) / 2] : [mx, T.y1 - (T.y1 - T.y0 - sd) / 2];
+      const ico = side === 'x1' ? [T.x1 - sd, my] : side === 'x0' ? [T.x0 + sd, my] : side === 'y1' ? [mx, T.y1 - sd] : [mx, T.y0 + sd];
+      const W = ([x, y]) => new THREE.Vector3(x, 0, -y).applyMatrix4(g.matrixWorld);
+      wrap.userData.templeWorld = {xmin: Math.min(...pts.map(p => p.x)), xmax: Math.max(...pts.map(p => p.x)), zmin: Math.min(...pts.map(p => p.z)), zmax: Math.max(...pts.map(p => p.z)), h: T.wall_h, start: W(nave), lookAt: W(ico)}; }
     return wrap;
   }
   return g;

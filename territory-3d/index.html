@@ -34,6 +34,11 @@
   @media (max-width:640px){ #panel{display:none} #panel.open{display:block;top:56px} #toggle{display:block} }
   #toggle button{font:inherit;padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
   details summary{cursor:pointer;color:var(--muted);font-size:12px}
+  #walk{position:absolute;inset:0;pointer-events:none}
+  #walk .hint{position:absolute;left:50%;top:12px;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:12px;color:var(--muted)}
+  #walk .pad{position:absolute;right:20px;bottom:20px;display:flex;flex-direction:column;align-items:center;gap:4px;pointer-events:auto}
+  #walk .pad div{display:flex;gap:4px}
+  #walk .pad button{width:48px;height:48px;font-size:18px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);touch-action:none}
   details ul{margin:4px 0 0 16px;padding:0;font-size:12px}
 </style>
 </head>
@@ -64,7 +69,7 @@
     <option value="ceiling">5 — подшивной расписной потолок</option>
   </select></label>
   <hr>
-  <button id="bTop">Вид сверху</button><button id="bIso">Общий вид</button><button id="bPark">К парковке</button><button id="bAbk1">К АБК-1</button><button id="bAbk2">К АБК-2</button><button id="bMosque">К мечети</button><button id="bTemple">В храм</button>
+  <button id="bTop">Вид сверху</button><button id="bIso">Общий вид</button><button id="bPark">К парковке</button><button id="bAbk1">К АБК-1</button><button id="bAbk2">К АБК-2</button><button id="bMosque">К мечети</button><button id="bTemple">Зайти в храм</button><button id="bExit" hidden>Выйти из прогулки</button>
   <hr>
   <div class="legend">
     <span class="sw" style="background:#d98f7a"></span><span>Здания (АБК, столовые, лаборатория)</span>
@@ -80,6 +85,10 @@
   <details><summary>Допущения</summary><ul id="notes"></ul></details>
 </div>
 <div id="info"></div>
+<div id="walk" hidden>
+  <div class="hint">Прогулка: W A S D или стрелки — идти, мышь (зажать) — смотреть, Q/E — повернуться, Esc — выйти</div>
+  <div class="pad"><button data-k="f">▲</button><div><button data-k="l">◀</button><button data-k="b">▼</button><button data-k="r">▶</button></div></div>
+</div>
 
 <script type="importmap">
 { "imports": {
@@ -341,7 +350,40 @@ function flyToBuilding(id, dist){ const b = site.buildings.find(x => x.id === id
 document.getElementById('bAbk1').onclick = () => flyToBuilding('1', 38);
 document.getElementById('bAbk2').onclick = () => flyToBuilding('2.1', 45);
 document.getElementById('bMosque').onclick = () => { const m = abks.find(a => a.id === 'MOSQUE'); if(!m) return; const c = m.placement.center; flyTo(new THREE.Vector3(c[0]+16, 9, -c[1]+14), new THREE.Vector3(c[0], 1, -c[1])); };
-document.getElementById('bTemple').onclick = () => { flyTo(new THREE.Vector3(119.2, 1.6, -266), new THREE.Vector3(123.5, 1.6, -258)); };
+// ---------- walk mode (first person inside the temple) ----------
+const walk = {on:false, yaw:0, pitch:0, keys:{}, box:null, drag:null};
+const walkUI = document.getElementById('walk'), bExit = document.getElementById('bExit');
+function templeBox(){ const w = Object.values(detailed).find(x => x.userData.templeWorld); return w ? w.userData.templeWorld : null; }
+function startWalk(){
+  const b = templeBox(); if(!b) return; walk.box = b; walk.on = true; controls.enabled = false;
+  // start at the middle of the nave looking along the hall
+  camera.position.set(b.start.x, 1.6, b.start.z); walk.yaw = Math.atan2(b.lookAt.x - b.start.x, -(b.lookAt.z - b.start.z)); walk.pitch = 0;
+  walkUI.hidden = false; bExit.hidden = false; document.getElementById('info').style.display = 'none';
+  walk.labels = groups.labels.visible; groups.labels.visible = false;
+  setRoofs(true); // the painted ceiling needs the roof group
+}
+function stopWalk(){ walk.on = false; walkUI.hidden = true; bExit.hidden = true; controls.enabled = true; groups.labels.visible = walk.labels !== false; document.getElementById('bAbk2').onclick(); }
+document.getElementById('bTemple').onclick = startWalk; bExit.onclick = stopWalk;
+addEventListener('keydown', e => { if(!walk.on) return; if(e.key === 'Escape') return stopWalk(); walk.keys[e.key.toLowerCase()] = true; if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(e.key.toLowerCase())) e.preventDefault(); });
+addEventListener('keyup', e => { walk.keys[e.key.toLowerCase()] = false; });
+renderer.domElement.addEventListener('pointerdown', e => { if(walk.on){ walk.drag = {x:e.clientX, y:e.clientY, yaw:walk.yaw, pitch:walk.pitch}; } });
+addEventListener('pointermove', e => { if(walk.on && walk.drag){ walk.yaw = walk.drag.yaw + (e.clientX - walk.drag.x) * 0.004; walk.pitch = Math.max(-1.2, Math.min(1.2, walk.drag.pitch + (e.clientY - walk.drag.y) * 0.003)); } });
+addEventListener('pointerup', () => { walk.drag = null; });
+walkUI.querySelectorAll('.pad button').forEach(b => { const k = {f:'w', b:'s', l:'a', r:'d'}[b.dataset.k]; b.addEventListener('pointerdown', e => { e.preventDefault(); walk.keys[k] = true; }); ['pointerup','pointerleave','pointercancel'].forEach(ev => b.addEventListener(ev, () => { walk.keys[k] = false; })); });
+let lastT = performance.now();
+function walkStep(){
+  const now = performance.now(), dt = Math.min(0.05, (now - lastT) / 1000); lastT = now; if(!walk.on) return;
+  const k = walk.keys, sp = 2.2 * dt, rot = 1.6 * dt;
+  if(k['q'] || k['arrowleft']) walk.yaw -= rot; if(k['e'] || k['arrowright']) walk.yaw += rot;
+  const fwd = new THREE.Vector3(Math.sin(walk.yaw), 0, -Math.cos(walk.yaw)), right = new THREE.Vector3(fwd.z, 0, -fwd.x).negate();
+  const p = camera.position.clone();
+  if(k['w'] || k['arrowup']) p.addScaledVector(fwd, sp); if(k['s'] || k['arrowdown']) p.addScaledVector(fwd, -sp);
+  if(k['a']) p.addScaledVector(right, -sp); if(k['d']) p.addScaledVector(right, sp);
+  const b = walk.box; p.x = Math.max(b.xmin+0.5, Math.min(b.xmax-0.5, p.x)); p.z = Math.max(b.zmin+0.5, Math.min(b.zmax-0.5, p.z)); p.y = 1.6;
+  camera.position.copy(p);
+  const look = p.clone().add(new THREE.Vector3(Math.sin(walk.yaw)*Math.cos(walk.pitch), -Math.sin(walk.pitch), -Math.cos(walk.yaw)*Math.cos(walk.pitch)));
+  camera.lookAt(look);
+}
 document.getElementById('tbtn').onclick = () => document.getElementById('panel').classList.toggle('open');
 const notes = document.getElementById('notes');
 [site.meta.scale_note, site.meta.axes, 'Высоты зданий — предварительные, для режима «Объёмы».', site.carports[0].note, site.gabions[0].note + ` ${site.gabions[0].count} шт., ${site.gabions[0].length_m} м.`,
@@ -357,6 +399,7 @@ document.getElementById('bPark').onclick = () => { const c = centroid(site.parki
 const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(); const info = document.getElementById('info');
 renderer.domElement.addEventListener('pointerdown', e => { renderer.domElement.userData = {x:e.clientX, y:e.clientY}; });
 renderer.domElement.addEventListener('pointerup', e => {
+  if(walk.on) return;
   const d = renderer.domElement.userData || {}; if(Math.hypot(e.clientX-d.x, e.clientY-d.y) > 4) return;
   mouse.set(e.clientX/innerWidth*2-1, -(e.clientY/innerHeight)*2+1); ray.setFromCamera(mouse, camera);
   const hit = ray.intersectObjects(bldMeshes.filter(m => { let o=m; while(o){ if(!o.visible) return false; o=o.parent; } return true; }), false)[0];
@@ -371,7 +414,7 @@ renderer.domElement.addEventListener('pointerup', e => {
   info.innerHTML = html; info.style.display = 'block';
 });
 addEventListener('resize', () => { camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
-renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+renderer.setAnimationLoop(() => { if(walk.on) walkStep(); else controls.update(); renderer.render(scene, camera); });
 </script>
 </body>
 </html>
