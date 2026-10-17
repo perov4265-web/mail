@@ -216,6 +216,20 @@ export function buildTemple(T) {
       const m = new THREE.Mesh(geo, F === 'wood' ? WOOD2 : new THREE.MeshLambertMaterial({color: 0xe8dcc0})); m.position.set(x - 0.15, 0, 0); m.castShadow = true; g.add(m);
       g.add(box(0.36, 0.06, Ly, GOLD, x, chord - 0.13, -(y0 + Ly / 2)));
       g.add(box(0.34, 0.1, Ly, F === 'wood' ? WOOD : new THREE.MeshLambertMaterial({color: 0xd8ccae}), x, chord - 0.05, -(y0 + Ly / 2)));
+      // carved panels: on both faces, one recessed panel per bay between column lines, framed by gilded strips
+      const lines = [y0, ...(T.columns || []).map(c => c[1]).filter((v, i, a) => a.indexOf(v) === i).sort((p, q) => p - q), y1];
+      const panelMat = F === 'wood' ? WOOD : new THREE.MeshLambertMaterial({color: 0xf0e6cf});
+      for (let i = 0; i < lines.length - 1; i++) {
+        const a = lines[i] + 0.25, b = lines[i + 1] - 0.25; if (b - a < 0.8) continue;
+        const ya = a, yb = b, hA = topY(a) - chord, hB = topY(b) - chord; const hMin = Math.min(hA, hB) - 0.14;
+        if (hMin < 0.25) continue;
+        [x - 0.16, x + 0.16].forEach(fx => {
+          g.add(box(0.02, hMin, b - a, panelMat, fx, chord + 0.07 + hMin / 2, -(a + b) / 2));           // lighter field
+          g.add(box(0.03, 0.04, b - a, GOLD, fx, chord + 0.07, -(a + b) / 2)); g.add(box(0.03, 0.04, b - a, GOLD, fx, chord + 0.07 + hMin, -(a + b) / 2));
+          g.add(box(0.03, hMin, 0.04, GOLD, fx, chord + 0.07 + hMin / 2, -a)); g.add(box(0.03, hMin, 0.04, GOLD, fx, chord + 0.07 + hMin / 2, -b));
+          const ros = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.03, 16), GOLD); ros.rotation.z = Math.PI / 2; ros.position.set(fx, chord + 0.07 + hMin / 2, -(a + b) / 2); g.add(ros);
+        });
+      }
     });
   }
   if (F === 'ceiling') {                                                                                                // suspended painted ceiling below the trusses
