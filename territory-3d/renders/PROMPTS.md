@@ -1,0 +1,34 @@
+# Ракурсы и промты для фотореалистичного рендеринга
+
+Каждый ракурс — скриншот из 3D-модели (`renders/*.jpg`) и промт. Скриншоты снимает
+`tools/renders/make_refs.js`: без подписей, стрелок движения, сетки и линий бордюров, с объёмами
+зданий для наружных видов, текстура плана очищена от пурпурных линий (`tools/renders/clean_plan.py`).
+Рендер — `tools/genapi_render.py` (gen-api.ru, Nano Banana 2, image-to-image), задачи и промты в
+`renders/ai/jobs.json`, результаты в `renders/ai/`.
+Общий хвост для всех промтов: *photorealistic architectural visualization, Kazakhstan steppe
+industrial camp, overcast soft daylight, 35 mm lens, high detail, no people, no text, no watermark*.
+
+| Файл | Камера (cam → at, м) | Промт |
+|---|---|---|
+| `park_aerial.jpg` | (120, 45, −280) → (70, 0, −322) | Aerial three-quarter view of a staff car park inside a fenced worker camp: two rows of perpendicular parking bays along a one-way asphalt aisle, eleven bays on each side covered by mono-pitch steel carports with dark grey corrugated profiled-sheet roofs, 4 m high at the aisle sloping to 2 m at the kerb, slim black steel posts every 5 m; a continuous gabion wall 1 m high and 0.6 m thick of galvanised welded mesh filled with medium grey stone crosses the whole lot from pavement to pavement at the east end of the carports; white bay markings, concrete paving-slab sidewalks, 2.5 m black mesh perimeter fence, low beige modular office buildings beyond. |
+| `park_aisle.jpg` | (104, 1.7, −323) → (60, 2.5, −323) | Eye-level view down the parking aisle towards the gabion wall: a 1 m high gabion wall of wire mesh and grey stone closes the aisle, behind it two mono-pitch steel carports on both sides, dark profiled-sheet roofs, black posts, white bay lines on grey asphalt, open bays in the foreground, mesh fence and a guard post at the far end. |
+| `park_gate.jpg` | (28, 1.7, −335) → (60, 2.5, −323) | Eye-level view from the entrance gate along the car park: mono-pitch carports left and right of the aisle, roofs rising towards the aisle, corrugated dark grey profiled sheet, slim steel posts, concrete sidewalk with kerb in the foreground, modular office buildings and the camp fence in the background. |
+| `park_gabion.jpg` | (90, 2.5, −308) → (76, 1.5, −324) | Close three-quarter view of the gabion wall end: galvanised welded-mesh boxes 1 × 1 × 0.6 m filled with medium grey crushed stone, neat stacked courses, standing across empty parking bays and the aisle; carport roofs of dark profiled sheet behind, black steel posts, grey asphalt with white lines, paving-slab sidewalk. |
+| `mosque_ne.jpg` | (43, 9, −135) → (32.5, 0.5, −121.5), с северо-востока | (баки и площадка ТКО у мечети убраны по решению заказчика) Small prayer house in a worker camp: light grey sandwich-panel module 7 × 6 m with dark grey corner profiles, low gable roof of profiled sheet with a dark band fascia, a gilded spire with a crescent on the ridge, an open canopy 2.7 m deep on two slim black posts at the east end, a small entrance vestibule on the north side, a single window; gravel and concrete-slab paving around, mesh fence, waste-container pad with three bins nearby. |
+| `mosque_canopy.jpg` | (46, 2.2, −112) → (35, 1.5, −118.6) | Eye-level view of the mosque canopy end: open steel canopy with profiled-sheet roof on two black posts, concrete slab under it, wooden door into the prayer hall, light grey sandwich panels with dark corner trims, gilded crescent finial above the roof band. |
+| `mosque_entrance.jpg` | (34, 1.8, −131) → (33, 1.5, −120) | Eye-level view of the north entrance: a small grey vestibule box attached to the module, wooden entrance door, short ramp, light grey panel walls, dark roof band, gilded spire, camp fence and road behind. |
+| `mosque_aerial.jpg` | (22, 24, −100) → (32, 0, −118.6) | Aerial view of the mosque module next to a fenced waste-container pad: gable roof of dark profiled sheet with a gilded finial, canopy on posts towards the pad, vestibule on the north, grey paving, kerbs, mesh fence, road with markings. |
+| `mosque_interior.jpg` | крыша снята, (38, 2.6, −123.5) → (29, 1.0, −117) | Interior of the prayer hall seen from above with the roof removed: one large deep green wool carpet with a gold border and rows of arched prayer niches covering the whole floor, light grey panel walls, a pale curtain divider across the room, a small shoe rack by the door, soft daylight from one window. |
+| `temple_nave.jpg` | из зала напротив иконостаса: (113.3, 1.6, −258.6) → (120.4, 1.8, −258.6) | Interior of an Orthodox chapel fitted inside a modular hall: iconostasis along the long wall with gilded icons, red-and-gold lattice royal doors, red curtains, a red carpet runner with gold border on a low wooden solea, brass candle stands, wooden lecterns, painted walls with pastel arches and leaf ornament, oak-clad square columns with gilded capitals, oak-clad roof trusses with stained-glass panels in the openings glowing warm, painted ceiling. |
+| `temple_trusses.jpg` | (124.5, 1.6, −266) → (114, 2.9, −254) | Looking up along the chapel hall at the oak-clad roof trusses: every chord, vertical and diagonal boxed in warm oak, gilded moulding along the bottom chord, leaded stained glass in every truss opening with warm backlight, painted ceiling with leaf ornament above, pastel painted walls with arches, high-backed oak choir stalls along the far wall. |
+| `temple_stasidia.jpg` | (118.6, 1.6, −255.2) → (113.4, 1.5, −262) | Eye-level view across the chapel towards the wall opposite the iconostasis: a row of high-backed arched oak choir stalls with dark stools between groups, white cabinets and a bench against the end wall, painted walls with blue medallion dado and pastel arches, oak-clad columns, red carpet runner, warm interior light. |
+
+## Варианты отделки храма и зал мечети
+
+| Файл | Камера | Что меняется |
+|---|---|---|
+| `temple_finish_white.jpg` … `temple_finish_ceiling.jpg` | та же, что `temple_nave.jpg` (`?finish=white\|wood\|wood_open\|wood_glass\|stucco\|icons\|icons_painted\|ceiling`) | отделка колонн и ферм: белая сталь, дуб сплошной с филёнками, дуб по элементам, дуб с витражами, каннелюры с позолотой, колонны-киоты, колонны-киоты с обшитыми фермами (библейские сюжеты, золочёные ленты с текстами на греческом, иврите и церковнославянском), подшивной расписной потолок |
+| `temple_open_trusses.jpg` | (114.6, 1.4, −258.6) → (118.6, 2.7, −256.0), `?finish=wood_open` | узел колонна–косынка–ферма крупно, вариант 2б |
+| `mosque_bed.jpg` | (33.5, 2.2, −133.5) → (32.4, 0.6, −125.5) | клумба-орнамент перед входом в мечеть с уровня глаз, цветущие кусты |
+| `mosque_bed_aerial.jpg` | (37, 9, −134) → (32.5, 0, −127) | клумба-орнамент сверху, рисунок розетки с полумесяцем |
+| `mosque_hall.jpg` | (30.9, 1.6, −116) → (26.7, 0.7, −121.3) | молитвенный зал с уровня глаз: ковёр, окно, штора-разделитель справа |

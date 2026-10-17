@@ -1,0 +1,122 @@
+[
+ {
+  "name": "park_aerial",
+  "ref": "renders/park_aerial.jpg",
+  "prompt": "Aerial three-quarter view of a staff car park inside a fenced worker camp: two rows of perpendicular parking bays along a one-way asphalt aisle, eleven bays on each side covered by mono-pitch steel carports with dark grey corrugated profiled-sheet roofs, 4 m high at the aisle sloping to 2 m at the kerb, slim black steel posts every 5 m; a row of gabion sections crosses the whole lot from pavement to pavement at the east end of the carports: four separate sections, each 2 m long, 1 m high, 0.6 m thick, galvanised welded mesh filled with medium grey stone: one at each pavement and two side by side in the middle of the aisle with a 1 m gap between them, wide open space between the end sections and the middle pair; white bay markings, concrete paving-slab sidewalks, 2.5 m black mesh perimeter fence, beyond the fence on the right an open outdoor car park with white bay markings on grey asphalt and flat empty steppe to the horizon; low flat-roofed modular buildings only on the left where the reference shows them. The long line between the car park and the outer lot is a 2 m high see-through black welded-mesh fence on slim posts, not a wall; the only gabions are the short row of sections crossing the lot at the end of the carports. Photorealistic architectural visualization, Kazakhstan steppe industrial camp, overcast soft daylight, 35 mm lens, high detail, no people, no text, no watermark."
+ },
+ {
+  "name": "park_aisle",
+  "ref": "renders/park_aisle.jpg",
+  "prompt": "Eye-level view down the parking aisle towards the gabion wall: four separate 1 m high gabion sections of wire mesh and grey stone, each 2 m long: two side by side in the middle of the aisle with a 1 m gap between them and one at each pavement, behind it two mono-pitch steel carports on both sides, dark profiled-sheet roofs, black posts, white bay lines on grey asphalt, open bays in the foreground, mesh fence and a guard post at the far end. The long line between the car park and the outer lot is a 2 m high see-through black welded-mesh fence on slim posts, not a wall; the only gabions are the short row of sections crossing the lot at the end of the carports. Photorealistic architectural visualization, Kazakhstan steppe industrial camp, overcast soft daylight, 35 mm lens, high detail, no people, no text, no watermark."
+ },
+ {
+  "name": "park_gate",
+  "ref": "renders/park_gate.jpg",
+  "prompt": "Eye-level view from the entrance gate along the car park: mono-pitch carports left and right of the aisle, roofs rising towards the aisle, corrugated dark grey profiled sheet, slim steel posts, concrete sidewalk with kerb in the foreground, modular office buildings and the camp fence in the background. The long line between the car park and the outer lot is a 2 m high see-through black welded-mesh fence on slim posts, not a wall; the only gabions are the short row of sections crossing the lot at the end of the carports. Photorealistic architectural visualization, Kazakhstan steppe industrial camp, overcast soft daylight, 35 mm lens, high detail, no people, no text, no watermark."
+ },
+ {
+  "name": "park_gabion",
+  "ref": "renders/park_gabion.jpg",
+  "prompt": "Close three-quarter view of the gabion wall end: galvanised welded-mesh gabion boxes 1 × 1 × 0.6 m filled with medium grey crushed stone, arranged in four separate 2 m sections: a pair in the middle of the aisle with a 1 m gap and one at each pavement, standing across empty parking bays and the aisle; carport roofs of dark profiled sheet behind, black steel posts, grey asphalt with white lines, paving-slab sidewalk. Photorealistic architectural visualization, Kazakhstan steppe industrial camp, overcast soft daylight, 35 mm lens, high detail, no people, no text, no watermark."
+ },
+ {
+  "name": "mosque_ne",
+  "ref": "renders/mosque_ne.jpg",
+  "prompt": "Small prayer house in a worker camp: light grey sandwich-panel module 7 × 6 m with dark grey corner profiles, low gable roof of profiled sheet with a dark band fascia, a gilded spire with a crescent on the ridge, an open canopy 2.7 m deep on two slim black posts at the east end, a small entrance vestibule on the north side, a single window; gravel and concrete-slab paving around, mesh fence In front of the north entrance a flowerbed shaped as an eight-lobed Islamic rosette: a low dry-stone kerb of natural grey stone follows the lobed outline, inside it the ornament is planted in flowers: deep crimson flowers form the pattern with a crescent and star in the centre, white alyssum and pale gravel fill the background; flowering shrubs around the mosque: pink spiraea along the west wall, red park roses flanking the entrance, yellow potentilla and white panicle hydrangeas around the bed.. There is exactly one flowerbed, in front of the entrance as in the reference; everywhere else the ground is plain grey gravel and paving. Photorealistic architectural visualization, Kazakhstan steppe industrial camp, overcast soft daylight, 35 mm lens, high detail, no people, no text, no watermark."
+ },
+ {
+  "name": "mosque_canopy",
+  "ref": "renders/mosque_canopy.jpg",
+  "prompt": "Eye-level view of the mosque canopy end: open steel canopy with profiled-sheet roof on two black posts, concrete slab under it, wooden door into the prayer hall, light grey sandwich panels with dark corner trims, gilded crescent finial above the roof band. Flowering shrubs near the walls. Photorealistic architectural visualization, Kazakhstan steppe industrial camp, overcast soft daylight, 35 mm lens, high detail, no people, no text, no watermark."
+ },
+ {
+  "name": "mosque_entrance",
+  "ref": "renders/mosque_entrance.jpg",
+  "prompt": "Eye-level view of the north entrance: a small grey vestibule box attached to the module, wooden entrance door, short ramp, light grey panel walls, dark roof band, gilded spire, camp fence and road behind. Flowering shrubs near the walls. Photorealistic architectural visualization, Kazakhstan steppe industrial camp, overcast soft daylight, 35 mm lens, high detail, no people, no text, no watermark."
+ },
+ {
+  "name": "mosque_aerial",
+  "ref": "renders/mosque_aerial.jpg",
+  "prompt": "Aerial view of the mosque module: gable roof of dark profiled sheet with a gilded finial, canopy on posts at the east end, vestibule on the north, grey paving, kerbs, mesh fence, road with markings. In front of the north entrance a flowerbed shaped as an eight-lobed Islamic rosette: a low dry-stone kerb of natural grey stone follows the lobed outline, inside it the ornament is planted in flowers: deep crimson flowers form the pattern with a crescent and star in the centre, white alyssum and pale gravel fill the background; flowering shrubs around the mosque: pink spiraea along the west wall, red park roses flanking the entrance, yellow potentilla and white panicle hydrangeas around the bed. Photorealistic architectural visualization, Kazakhstan steppe industrial camp, overcast soft daylight, 35 mm lens, high detail, no people, no text, no watermark."
+ },
+ {
+  "name": "mosque_interior",
+  "ref": "renders/mosque_interior.jpg",
+  "prompt": "Interior of the prayer hall seen from above with the roof removed: one large deep green wool carpet with a gold border and rows of arched prayer niches covering the whole floor, light grey panel walls, a pale curtain divider across the room, a small shoe rack by the door, soft daylight from one window. Photorealistic architectural interior visualization, 24 mm lens, high detail, no people, no text, no watermark."
+ },
+ {
+  "name": "temple_nave",
+  "ref": "renders/temple_nave.jpg",
+  "prompt": "Interior of an Orthodox chapel fitted inside a modular hall: iconostasis along the long wall with gilded icons, red-and-gold lattice royal doors, red curtains, a red carpet runner with gold border on a low wooden solea, brass candle stands, wooden lecterns, painted walls with pastel arches and leaf ornament, oak-clad square columns with gilded capitals, oak-clad roof trusses with stained-glass panels in the openings glowing warm, painted ceiling. Thin openwork oak brackets, only 40 mm thick, fretwork with pierced scroll openings and an ogee outline, sit under the truss on both sides of every column top. Photorealistic architectural interior visualization, 24 mm lens, high detail, no people, no text, no watermark."
+ },
+ {
+  "name": "temple_trusses",
+  "ref": "renders/temple_trusses.jpg",
+  "prompt": "Looking up along the chapel hall at the oak-clad roof trusses: every chord, vertical and diagonal boxed in warm oak, gilded moulding along the bottom chord, leaded stained glass in every truss opening with warm backlight, painted ceiling with leaf ornament above, pastel painted walls with arches, high-backed oak choir stalls along the far wall. Thin openwork oak brackets, only 40 mm thick, fretwork with pierced scroll openings and an ogee outline, sit under the truss on both sides of every column top. Photorealistic architectural interior visualization, 24 mm lens, high detail, no people, no text, no watermark."
+ },
+ {
+  "name": "temple_stasidia",
+  "ref": "renders/temple_stasidia.jpg",
+  "prompt": "Eye-level view across the chapel towards the wall opposite the iconostasis: a row of high-backed arched oak choir stalls with dark stools between groups, white cabinets and a bench against the end wall, painted walls with blue medallion dado and pastel arches, oak-clad columns, red carpet runner, warm interior light. Thin openwork oak brackets, only 40 mm thick, fretwork with pierced scroll openings and an ogee outline, sit under the truss on both sides of every column top. Photorealistic architectural interior visualization, 24 mm lens, high detail, no people, no text, no watermark."
+ },
+ {
+  "name": "temple_finish_white",
+  "ref": "renders/temple_finish_white.jpg",
+  "prompt": "Interior of an Orthodox chapel fitted inside a modular hall, seen from the hall in front of the iconostasis: iconostasis along the far wall with gilded icons, red-and-gold lattice royal doors with a gilded cross above, red curtains, a low wooden solea with a red carpet runner with gold border, brass candle stands and a wooden lectern in the foreground, painted walls with pastel arches, painted ceiling with leaf ornament and medallions, warm interior light. Square columns and the roof trusses above are plain steel painted white, open lattice truss members visible under the painted ceiling. Thin openwork oak brackets, only 40 mm thick, fretwork with pierced scroll openings and an ogee outline, sit under the truss on both sides of every column top. Photorealistic architectural interior visualization, 24 mm lens, high detail, no people, no text, no watermark."
+ },
+ {
+  "name": "temple_finish_wood",
+  "ref": "renders/temple_finish_wood.jpg",
+  "prompt": "Interior of an Orthodox chapel fitted inside a modular hall, seen from the hall in front of the iconostasis: iconostasis along the far wall with gilded icons, red-and-gold lattice royal doors with a gilded cross above, red curtains, a low wooden solea with a red carpet runner with gold border, brass candle stands and a wooden lectern in the foreground, painted walls with pastel arches, painted ceiling with leaf ornament and medallions, warm interior light. Square columns boxed in warm oak, roof trusses fully enclosed in oak casings with carved raised panels and a gilded moulding along the bottom chord. Thin openwork oak brackets, only 40 mm thick, fretwork with pierced scroll openings and an ogee outline, sit under the truss on both sides of every column top. Photorealistic architectural interior visualization, 24 mm lens, high detail, no people, no text, no watermark."
+ },
+ {
+  "name": "temple_finish_wood_open",
+  "ref": "renders/temple_finish_wood_open.jpg",
+  "prompt": "Interior of an Orthodox chapel fitted inside a modular hall, seen from the hall in front of the iconostasis: iconostasis along the far wall with gilded icons, red-and-gold lattice royal doors with a gilded cross above, red curtains, a low wooden solea with a red carpet runner with gold border, brass candle stands and a wooden lectern in the foreground, painted walls with pastel arches, painted ceiling with leaf ornament and medallions, warm interior light. Square columns boxed in warm oak with a plinth and a small capital. The roof trusses are an OPEN LATTICE exactly as in the reference: a horizontal bottom chord, two sloping top chords meeting at the ridge, short verticals and diagonals between them; every member is a slender oak-clad box of about 20 cm, the same slim proportions as in the reference, never thick timber beams; all triangular openings between the members stay open and show the painted ceiling behind; a thin gilded moulding runs along the bottom chord. Thin openwork oak brackets, only 40 mm thick, fretwork with pierced scroll openings and an ogee outline, sit under the bottom chord on both sides of every column top. The royal doors in the centre of the iconostasis are a red lattice with a gold grid, as in the reference. Keep every element at the position, size and proportion of the reference. Photorealistic architectural interior visualization, 24 mm lens, high detail, no people, no watermark."
+ },
+ {
+  "name": "temple_finish_wood_glass",
+  "ref": "renders/temple_finish_wood_glass.jpg",
+  "prompt": "Interior of an Orthodox chapel fitted inside a modular hall, seen from the hall in front of the iconostasis: iconostasis along the far wall with gilded icons, red-and-gold lattice royal doors with a gilded cross above, red curtains, a low wooden solea with a red carpet runner with gold border, brass candle stands and a wooden lectern in the foreground, painted walls with pastel arches, painted ceiling with leaf ornament and medallions, warm interior light. Square columns boxed in warm oak, every truss member individually clad in oak, the openings between members filled with leaded stained glass glowing warm. Thin openwork oak brackets, only 40 mm thick, fretwork with pierced scroll openings and an ogee outline, sit under the truss on both sides of every column top. Photorealistic architectural interior visualization, 24 mm lens, high detail, no people, no text, no watermark."
+ },
+ {
+  "name": "temple_finish_stucco",
+  "ref": "renders/temple_finish_stucco.jpg",
+  "prompt": "Interior of an Orthodox chapel fitted inside a modular hall, seen from the hall in front of the iconostasis: iconostasis along the far wall with gilded icons, red-and-gold lattice royal doors with a gilded cross above, red curtains, a low wooden solea with a red carpet runner with gold border, brass candle stands and a wooden lectern in the foreground, painted walls with pastel arches, painted ceiling with leaf ornament and medallions, warm interior light. Fluted stucco columns with gilded capitals, roof trusses boxed in white stucco casings with gilded mouldings along the chords. Thin openwork oak brackets, only 40 mm thick, fretwork with pierced scroll openings and an ogee outline, sit under the truss on both sides of every column top. Photorealistic architectural interior visualization, 24 mm lens, high detail, no people, no text, no watermark."
+ },
+ {
+  "name": "temple_finish_icons",
+  "ref": "renders/temple_finish_icons.jpg",
+  "prompt": "Interior of an Orthodox chapel fitted inside a modular hall, seen from the hall in front of the iconostasis: iconostasis along the far wall with gilded icons, red-and-gold lattice royal doors with a gilded cross above, red curtains, a low wooden solea with a red carpet runner with gold border, brass candle stands and a wooden lectern in the foreground, painted walls with pastel arches, painted ceiling with leaf ornament and medallions, warm interior light. Columns shaped as tall oak icon cases with gilded frames and icons on each face, roof trusses of white painted steel above. Thin openwork oak brackets, only 40 mm thick, fretwork with pierced scroll openings and an ogee outline, sit under the truss on both sides of every column top. Photorealistic architectural interior visualization, 24 mm lens, high detail, no people, no text, no watermark."
+ },
+ {
+  "name": "temple_finish_ceiling",
+  "ref": "renders/temple_finish_ceiling.jpg",
+  "prompt": "Interior of an Orthodox chapel fitted inside a modular hall, seen from the hall in front of the iconostasis: iconostasis along the far wall with gilded icons, red-and-gold lattice royal doors with a gilded cross above, red curtains, a low wooden solea with a red carpet runner with gold border, brass candle stands and a wooden lectern in the foreground, painted walls with pastel arches, painted ceiling with leaf ornament and medallions, warm interior light. A flat suspended painted ceiling with leaf ornament and medallions hides the roof trusses completely, square columns painted white with gilded capitals. Thin openwork oak brackets, only 40 mm thick, fretwork with pierced scroll openings and an ogee outline, sit under the truss on both sides of every column top. Photorealistic architectural interior visualization, 24 mm lens, high detail, no people, no text, no watermark."
+ },
+ {
+  "name": "mosque_hall",
+  "ref": "renders/mosque_hall.jpg",
+  "prompt": "Interior of a small prayer room in a modular building, eye-level corner view: a luxurious deep green wool carpet with a gold border and rows of arched prayer niches covering the whole floor, light grey sandwich-panel walls with slim dark joints, a small window with daylight, a pale fabric curtain divider on the right, low flat ceiling, calm soft light. Photorealistic architectural interior visualization, 24 mm lens, high detail, no people, no text, no watermark."
+ },
+ {
+  "name": "temple_finish_icons_painted",
+  "ref": "renders/temple_finish_icons_painted.jpg",
+  "prompt": "Interior of an Orthodox chapel fitted inside a modular hall, seen from the hall in front of the iconostasis: iconostasis along the far wall with gilded icons, red-and-gold lattice royal doors with a gilded cross above, red curtains, a low wooden solea with a red carpet runner with gold border, brass candle stands and a wooden lectern in the foreground, painted walls with pastel arches, painted ceiling with leaf ornament and medallions, warm interior light. Columns shaped as tall oak icon cases (kiots) with gilded frames and painted icons on each face. The roof trusses are fully boxed in oak casings; each casing carries painted biblical scenes in Byzantine icon style (haloed figures on gold and ochre landscapes) and, below them, a continuous band covered in real gold leaf with embossed scripture verses in Greek, Hebrew and Old Church Slavonic lettering, the letters dark on burnished gold; gilded mouldings along the chords. Keep the text bands legible as calligraphic lettering. Thin openwork oak brackets, only 40 mm thick, fretwork with pierced scroll openings and an ogee outline, sit under the truss on both sides of every column top. Photorealistic architectural interior visualization, 24 mm lens, high detail, no people, no watermark."
+ },
+ {
+  "name": "temple_open_trusses",
+  "ref": "renders/temple_open_trusses.jpg",
+  "prompt": "Close view inside an Orthodox chapel fitted in a modular hall, looking up at the junction of an oak-clad square column and an oak-clad open-lattice roof truss. Square columns boxed in warm oak with a plinth and a small capital. The roof trusses are an OPEN LATTICE exactly as in the reference: a horizontal bottom chord, two sloping top chords meeting at the ridge, short verticals and diagonals between them; every member is a slender oak-clad box of about 20 cm, the same slim proportions as in the reference, never thick timber beams; all triangular openings between the members stay open and show the painted ceiling behind; a thin gilded moulding runs along the bottom chord. Thin openwork oak brackets, only 40 mm thick, fretwork with pierced scroll openings and an ogee outline, sit under the bottom chord on both sides of every column top. The royal doors in the centre of the iconostasis are a red lattice with a gold grid, as in the reference. Keep every element at the position, size and proportion of the reference. Iconostasis with gilded icons and red curtains behind, painted walls with pastel arches, painted ceiling with leaf ornament, warm interior light. Photorealistic architectural interior visualization, 24 mm lens, high detail, no people, no watermark."
+ },
+ {
+  "name": "mosque_bed",
+  "ref": "renders/mosque_bed.jpg",
+  "prompt": "Eye-level view from the path towards the north entrance of a small prayer house in a worker camp, light grey sandwich-panel module with a dark roof band and a gilded crescent finial, small entrance vestibule with a wooden door and a short ramp. In front of the north entrance a flowerbed shaped as an eight-lobed Islamic rosette: a low dry-stone kerb of natural grey stone follows the lobed outline, inside it the ornament is planted in flowers: deep crimson flowers form the pattern with a crescent and star in the centre, white alyssum and pale gravel fill the background; flowering shrubs around the mosque: pink spiraea along the west wall, red park roses flanking the entrance, yellow potentilla and white panicle hydrangeas around the bed. Grey paving slabs and fine gravel around, camp fence and road in the background. Photorealistic architectural visualization, Kazakhstan steppe industrial camp, overcast soft daylight, 35 mm lens, high detail, no people, no text, no watermark."
+ },
+ {
+  "name": "mosque_bed_aerial",
+  "ref": "renders/mosque_bed_aerial.jpg",
+  "prompt": "Elevated three-quarter view of the entrance side of a small prayer house in a worker camp, light grey sandwich-panel module with a dark roof, entrance vestibule and ramp on the near side. In front of the north entrance a flowerbed shaped as an eight-lobed Islamic rosette: a low dry-stone kerb of natural grey stone follows the lobed outline, inside it the ornament is planted in flowers: deep crimson flowers form the pattern with a crescent and star in the centre, white alyssum and pale gravel fill the background; flowering shrubs around the mosque: pink spiraea along the west wall, red park roses flanking the entrance, yellow potentilla and white panicle hydrangeas around the bed. The rosette pattern of the flowerbed is clearly readable from above. Grey paving and fine gravel around. Photorealistic architectural visualization, Kazakhstan steppe industrial camp, overcast soft daylight, 35 mm lens, high detail, no people, no text, no watermark."
+ }
+]
