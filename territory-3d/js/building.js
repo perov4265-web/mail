@@ -130,7 +130,7 @@ export function buildDetailedBuilding(abk, footprint, opts = {}) {
       // centre of each slope
       const cz = -(half + s * (half + ov) / 2);
       sheet.position.set(Lx / 2, (eave + ridge) / 2 + 0.03, cz);
-      sheet.rotation.x = s * ang; sheet.castShadow = sheet.receiveShadow = true; roofG.add(sheet);
+      sheet.rotation.x = -s * ang; sheet.castShadow = sheet.receiveShadow = true; roofG.add(sheet);
     });
     // gable end triangles (wall above the chord)
     const tri = new THREE.Shape(); tri.moveTo(0, 0); tri.lineTo(Ly, 0); tri.lineTo(Ly / 2, ridge - eave); tri.closePath();
