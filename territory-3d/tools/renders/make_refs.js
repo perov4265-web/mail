@@ -13,6 +13,7 @@ const VIEWS = {
   mosque_interior: 'roof=0&cam=38,2.6,-123.5&at=29,1.0,-117', mosque_hall: 'cam=30.9,1.6,-116.0&at=26.7,0.7,-121.3',
   temple_nave: 'finish=wood&' + FRONT, temple_trusses: 'cam=124.5,1.6,-266&at=114,2.9,-254',
   temple_stasidia: 'cam=118.6,1.6,-255.2&at=113.4,1.5,-262',
+  temple_open_trusses: 'finish=wood_open&cam=114.6,1.4,-258.6&at=118.6,2.7,-256.0',   // узел колонна–косынка–ферма, вариант 2б
 };
 for (const f of ['white', 'wood', 'wood_open', 'wood_glass', 'stucco', 'icons', 'icons_painted', 'ceiling']) VIEWS['temple_finish_' + f] = 'finish=' + f + '&' + FRONT;
 (async () => {
