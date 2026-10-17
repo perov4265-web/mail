@@ -53,6 +53,8 @@
   <label><input type="checkbox" id="cbGabion" checked> Габионы 1000×600</label>
   <label><input type="checkbox" id="cbSigns" checked> Дорожные знаки на стойках</label>
   <label><input type="checkbox" id="cbDetail" checked> АБК-1 и АБК-2 детально (стены, окна, мебель, фермы)</label>
+  <label><input type="checkbox" id="cbRoof" checked> Кровли АБК (снять, чтобы видеть планировку)</label>
+  <label><input type="checkbox" id="cbTruss" checked> Фермы и прогоны АБК-2</label>
   <hr>
   <button id="bTop">Вид сверху</button><button id="bIso">Общий вид</button><button id="bPark">К парковке</button><button id="bAbk1">К АБК-1</button><button id="bAbk2">К АБК-2</button>
   <hr>
@@ -181,7 +183,10 @@ abks.forEach(abk => {
   G('detail').add(wrap); detailed[fb.id] = wrap;
 });
 function setDetail(on){ groups.detail.visible = on; site.buildings.forEach((b,i) => { if(detailed[b.id]) bldMeshes[i].visible = !on; }); }
+function setRoofs(on){ Object.values(detailed).forEach(w => w.traverse(o => { if(o.name === 'roof') o.visible = on; })); }
+function setTrusses(on){ Object.values(detailed).forEach(w => w.traverse(o => { if(o.name === 'trusses') o.visible = on; })); }
 setDetail(true);
+if(new URLSearchParams(location.search).get('roof') === '0'){ setRoofs(false); setTrusses(false); document.getElementById('cbRoof').checked = false; document.getElementById('cbTruss').checked = false; }
 
 // ---------- fences ----------
 function fenceLine(pts, h, color){
@@ -306,7 +311,7 @@ function centroid(poly){ let A=0,X=0,Y=0; for(let i=0;i<poly.length;i++){ const 
 // ---------- UI ----------
 const bind = (id, grp, fn) => document.getElementById(id).addEventListener('change', e => { if(grp) groups[grp].visible = e.target.checked; if(fn) fn(e.target.checked); });
 bind('cbPlan', null, applyPlan); bind('cbCurbs','curbs'); bind('cbBld','bld'); bind('cbVol', null, setVolumes); bind('cbLabels','labels');
-bind('cbFence','fence'); bind('cbPark','park'); bind('cbCarport','carport'); bind('cbGabion','gabion'); bind('cbSigns','signs'); bind('cbDetail', null, setDetail);
+bind('cbFence','fence'); bind('cbPark','park'); bind('cbCarport','carport'); bind('cbGabion','gabion'); bind('cbSigns','signs'); bind('cbDetail', null, setDetail); bind('cbRoof', null, setRoofs); bind('cbTruss', null, setTrusses);
 function flyToBuilding(id, dist){ const b = site.buildings.find(x => x.id === id); if(!b) return; const c = centroid(b.footprint); flyTo(new THREE.Vector3(c[0]+dist, dist*0.6, -c[1]+dist), new THREE.Vector3(c[0], 1.5, -c[1])); }
 document.getElementById('bAbk1').onclick = () => flyToBuilding('1', 38);
 document.getElementById('bAbk2').onclick = () => flyToBuilding('2.1', 45);

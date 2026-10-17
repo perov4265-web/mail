@@ -27,15 +27,17 @@ const L = (x, y, h = 0) => new THREE.Vector3(x, h, -y);
 
 function wallAxis(r) { const w = r[2] - r[0], d = r[3] - r[1]; return w >= d ? 'x' : 'y'; }
 
-function buildWall(g, r, H, openings) {
+function buildWall(g, r, H, openings, material) {
   const axis = wallAxis(r);
+  const wm = material === 'glass' ? MAT.glass : MAT.wall;
   const t = axis === 'x' ? r[3] - r[1] : r[2] - r[0];
   const a0 = axis === 'x' ? r[0] : r[1], a1 = axis === 'x' ? r[2] : r[3];
   const c = axis === 'x' ? (r[1] + r[3]) / 2 : (r[0] + r[2]) / 2;
   const piece = (from, to, z0, z1) => {
     if (to - from < 0.005 || z1 - z0 < 0.005) return;
     const len = to - from, mid = (from + to) / 2, h = z1 - z0;
-    const m = axis === 'x' ? box(len, h, t, MAT.wall, mid, z0 + h / 2, -c) : box(t, h, len, MAT.wall, c, z0 + h / 2, -mid);
+    const m = axis === 'x' ? box(len, h, t, wm, mid, z0 + h / 2, -c) : box(t, h, len, wm, c, z0 + h / 2, -mid);
+    if (material === 'glass') m.castShadow = false;
     g.add(m);
   };
   const ops = openings.filter(o => o.to > a0 + 0.01 && o.from < a1 - 0.01).sort((p, q) => p.from - q.from);
@@ -59,7 +61,9 @@ export function buildDetailedBuilding(abk, footprint, opts = {}) {
   const addOp = (i, op) => { if (!byWall.has(i)) byWall.set(i, []); byWall.get(i).push(op); };
   (abk.windows || []).forEach(w => addOp(w.wall, {from: w.from, to: w.to, z0: w.sill, z1: w.head}));
   (abk.doors || []).forEach(d => addOp(d.wall, {from: d.from, to: d.to, z0: 0, z1: d.height}));
-  const info = walls.map((w, i) => buildWall(g, w.rect, H, byWall.get(i) || []));
+  const info = walls.map((w, i) => buildWall(g, w.rect, H, byWall.get(i) || [], w.material));
+  const roofG = new THREE.Group(); roofG.name = 'roof'; g.add(roofG);
+  const trussG = new THREE.Group(); trussG.name = 'trusses'; g.add(trussG);
 
   // windows: glass pane + frame
   (abk.windows || []).forEach(w => {
@@ -111,12 +115,12 @@ export function buildDetailedBuilding(abk, footprint, opts = {}) {
   const roof = abk.roof || {type: 'flat_parapet', parapet_top: H + 1.2};
   if (roof.type === 'flat_parapet') {
     const top = roof.parapet_top;
-    g.add(box(Lx, 0.2, Ly, MAT.roof, Lx / 2, H + 0.1, -Ly / 2));
+    roofG.add(box(Lx, 0.2, Ly, MAT.roof, Lx / 2, H + 0.1, -Ly / 2));
     const pt = abk.wall_thickness_m || 0.11, ph = top - H;
-    g.add(box(Lx, ph, pt, MAT.parapet, Lx / 2, H + ph / 2, -pt / 2));
-    g.add(box(Lx, ph, pt, MAT.parapet, Lx / 2, H + ph / 2, -(Ly - pt / 2)));
-    g.add(box(pt, ph, Ly, MAT.parapet, pt / 2, H + ph / 2, -Ly / 2));
-    g.add(box(pt, ph, Ly, MAT.parapet, Lx - pt / 2, H + ph / 2, -Ly / 2));
+    roofG.add(box(Lx, ph, pt, MAT.parapet, Lx / 2, H + ph / 2, -pt / 2));
+    roofG.add(box(Lx, ph, pt, MAT.parapet, Lx / 2, H + ph / 2, -(Ly - pt / 2)));
+    roofG.add(box(pt, ph, Ly, MAT.parapet, pt / 2, H + ph / 2, -Ly / 2));
+    roofG.add(box(pt, ph, Ly, MAT.parapet, Lx - pt / 2, H + ph / 2, -Ly / 2));
   } else if (roof.type === 'gable') {
     const eave = roof.eave, ridge = roof.ridge, ov = roof.overhang || 0.3, chord = roof.bottom_chord || H;
     const half = Ly / 2, slopeLen = Math.hypot(half + ov, ridge - eave);
@@ -126,33 +130,34 @@ export function buildDetailedBuilding(abk, footprint, opts = {}) {
       // centre of each slope
       const cz = -(half + s * (half + ov) / 2);
       sheet.position.set(Lx / 2, (eave + ridge) / 2 + 0.03, cz);
-      sheet.rotation.x = s * ang; sheet.castShadow = sheet.receiveShadow = true; g.add(sheet);
+      sheet.rotation.x = s * ang; sheet.castShadow = sheet.receiveShadow = true; roofG.add(sheet);
     });
     // gable end triangles (wall above the chord)
     const tri = new THREE.Shape(); tri.moveTo(0, 0); tri.lineTo(Ly, 0); tri.lineTo(Ly / 2, ridge - eave); tri.closePath();
     [0, Lx].forEach(x => { const m = new THREE.Mesh(new THREE.ShapeGeometry(tri), new THREE.MeshLambertMaterial({color: 0xe8e4d8, side: THREE.DoubleSide}));
-      m.rotation.y = -Math.PI / 2; m.position.set(x, eave, 0); m.castShadow = true; g.add(m); });
-    // trusses: bottom chord at `chord`, top chord along the slope, verticals + diagonals
-    const t = roof.truss || {}; const pitch = t.pitch || 3.1, mem = t.member || 0.08;
-    const member = (p, q) => { const a = L(...p), b = L(...q); const len = a.distanceTo(b); const m = new THREE.Mesh(new THREE.BoxGeometry(mem, mem, len), MAT.steel);
+      m.rotation.y = -Math.PI / 2; m.position.set(x, eave, 0); m.castShadow = true; roofG.add(m); });
+    // trusses at a uniform pitch along the length: bottom chord at `chord`, top chord 0.12 m under the sheet, verticals + diagonals
+    const t = roof.truss || {}; const pitch = t.pitch || 3.1, mem = t.member || 0.08, off = 0.12;
+    const member = (p, q, mat = MAT.steel) => { const a = L(...p), b = L(...q); const len = a.distanceTo(b); const m = new THREE.Mesh(new THREE.BoxGeometry(mem, mem, len), mat);
       m.position.copy(a.clone().lerp(b, 0.5)); m.lookAt(b); m.castShadow = true; return m; };
-    const n = Math.round(Lx / pitch);
-    for (let i = 0; i <= n; i++) {
-      const x = Math.min(i * pitch, Lx); if (i > 0 && x - (i - 1) * pitch < pitch * 0.5) continue;
-      g.add(member([x, 0, chord], [x, Ly, chord]));
-      g.add(member([x, 0, eave], [x, Ly / 2, ridge])); g.add(member([x, Ly / 2, ridge], [x, Ly, eave]));
+    const topAt = y => eave - off + (ridge - eave) * (1 - Math.abs(y - Ly / 2) / (Ly / 2));
+    const x0 = t.first !== undefined ? t.first : 0;
+    for (let x = x0; x <= Lx + 0.01; x += pitch) {
+      const xx = Math.min(x, Lx);
+      trussG.add(member([xx, 0, chord], [xx, Ly, chord]));
+      trussG.add(member([xx, 0, topAt(0)], [xx, Ly / 2, topAt(Ly / 2)])); trussG.add(member([xx, Ly / 2, topAt(Ly / 2)], [xx, Ly, topAt(Ly)]));
       const panels = t.panels || 6; for (let k = 0; k <= panels; k++) {
-        const y = Ly * k / panels; const top = eave + (ridge - eave) * (1 - Math.abs(y - Ly / 2) / (Ly / 2));
-        if (top - chord > 0.1) g.add(member([x, y, chord], [x, y, top]));
-        if (k < panels) { const y2 = Ly * (k + 1) / panels; const top2 = eave + (ridge - eave) * (1 - Math.abs(y2 - Ly / 2) / (Ly / 2));
-          g.add(k % 2 === 0 ? member([x, y, chord], [x, y2, top2]) : member([x, y, top], [x, y2, chord])); }
+        const y = Ly * k / panels; const top = topAt(y);
+        if (top - chord > 0.1) trussG.add(member([xx, y, chord], [xx, y, top]));
+        if (k < panels) { const y2 = Ly * (k + 1) / panels; const top2 = topAt(y2);
+          g.add(k % 2 === 0 ? member([xx, y, chord], [xx, y2, top2]) : member([xx, y, top], [xx, y2, chord])); }
       }
     }
     // purlins along the length on each slope
     const pur = t.purlins || 5;
-    for (let k = 0; k <= pur; k++) { [1, -1].forEach(s => { const y = Ly / 2 + s * (Ly / 2) * k / pur; const z = eave + (ridge - eave) * (1 - k / pur); g.add(member([0, y, z - 0.04], [Lx, y, z - 0.04])); }); }
+    for (let k = 0; k <= pur; k++) { [1, -1].forEach(s => { const y = Ly / 2 + s * (Ly / 2) * k / pur; const z = topAt(y) + 0.02; trussG.add(member([0, y, z], [Lx, y, z])); }); }
     // eave band (fascia)
-    [0, Ly].forEach(y => g.add(box(Lx + 2 * ov, 0.25, 0.05, MAT.parapet, Lx / 2, eave - 0.1, -(y === 0 ? -ov : Ly + ov))));
+    [0, Ly].forEach(y => roofG.add(box(Lx + 2 * ov, 0.25, 0.05, MAT.parapet, Lx / 2, eave - 0.1, -(y === 0 ? -ov : Ly + ov))));
   }
   // labels (room names) as small sprites
   if (opts.label && abk.labels) abk.labels.forEach(l => { const s = opts.label(l.s, [l.p[0], l.p[1]], 0x334455, 0.9, H + 0.3); s.position.copy(L(l.p[0], l.p[1], 0.9)); g.add(s); });
