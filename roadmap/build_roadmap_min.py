@@ -36,6 +36,7 @@ h1 b {{ font-weight:700; }}
 .row {{ display:flex; gap:14px; font-size:13px; line-height:1.35; margin-bottom:9px; }}
 .row .k {{ flex:0 0 112px; font-weight:700; white-space:nowrap; }}
 .row .k.acc {{ color:{ACC}; }}
+.col {{ top:905px; }}
 .row .t {{ color:{INK}; }}
 .row .t small {{ color:{MUTE}; }}
 .li {{ display:flex; gap:10px; font-size:13px; line-height:1.35; margin-bottom:8px; }}
@@ -51,7 +52,7 @@ A("<div class='cap'>T0 — вступление Договора в силу · 
 A(f"<div class='big'><div class='v'>{usd(TOTAL)} USD</div><div class='l'>3 партии · 56 комплектов · последняя поставка T0 + {LOTS[2]['S']+DP} дн</div></div>")
 
 # ---------------- main timeline ----------------
-top, h = 170, 580
+top, h = 175, 690
 A(f"<svg class='abs' style='left:0;top:{top}px' width='{W}' height='{h}'>")
 x0, x1 = 390, W - 110
 DMAX = 215
@@ -70,7 +71,7 @@ A(f"<line x1='{xa:.1f}' y1='{ay}' x2='{xa:.1f}' y2='{h-70}' stroke='{INK}' strok
 A(f"<text x='{xa+6:.1f}' y='{h-76}' font-size='11' fill='{MUTE}'>A = T0 + 10 дн</text>")
 
 # lot rows
-ry, rh = 92, 112
+ry, rh = 100, 150
 for i, lot in enumerate(LOTS):
     y = ry + i * rh
     S, D = lot["S"], lot["S"] + DP
@@ -112,33 +113,13 @@ A("</svg>")
 
 # ---------------- columns ----------------
 c1, c2, c3 = 70, 600, 1120
-A(f"<div class='col' style='left:{c1}px;width:480px'><h2>Цикл одной партии · от даты отгрузки S</h2>")
-for k, t in [("S − 90", "уведомление об отгрузке, старт изготовления"),
-             ("S − 30", "готовность, заводские испытания, заявление в NTRA на ввоз"),
-             ("S − 20", "приёмочная инспекция FAT на заводе"),
-             ("S − 1", "разрешение Заказчика на отгрузку, ACID, полис"),
-             ("S", "<b>отгрузка</b> · S + 1 акт о переходе права собственности"),
-             ("S + 7", "прибытие в Каир, авиа"),
-             ("S + 30", "прибытие на Площадку, разрешение NTRA на ввоз"),
-             ("S + 40", "<b>Акт входного контроля = Дата поставки</b>")]:
-    A(f"<div class='row'><div class='k'>{k}</div><div class='t'>{t}</div></div>")
-A("</div>")
-
-A(f"<div class='col' style='left:{c2}px;width:470px'><h2>Платежи · ст. 23</h2>")
-for k, t in [("35 %", f"аванс · A = T0 + 10 дн <small>· {usd(TOTAL*0.35)}</small>"),
-             ("30 %", f"по каждой партии · S + 10 дн <small>· всего {usd(TOTAL*0.30)}</small>"),
-             ("30 %", f"по каждой партии · ДП + 10 дн <small>· всего {usd(TOTAL*0.30)}</small>"),
-             ("5 %", f"по Блоку · Акт сдачи-приёмки + 30 дн <small>· {usd(TOTAL*0.05)}</small>")]:
-    A(f"<div class='row'><div class='k'>{k}</div><div class='t'>{t}</div></div>")
-A(f"<div class='row' style='margin-top:14px'><div class='k'>Услуги</div><div class='t'>FAT, анализатор спектра, сборы NTRA <small>· {usd(SERV)}</small></div></div>")
-A("</div>")
-
-A(f"<div class='col' style='left:{c3}px;width:400px'><h2 class='acc'>Проблемы</h2>")
+A(f"<div class='col' style='left:{c1}px;width:470px'><h2 class='acc'>Проблемы</h2>")
 for k, t in [("1 мес", "шифрование радиооборудования влияет на таможенный выпуск"),
              ("до НГ", "разработка 16 и согласование 27 комплектов РД"),
              ("—", "допсоглашение с АСЭ: подготовка и согласование")]:
     A(f"<div class='row'><div class='k acc' style='flex-basis:60px'>{k}</div><div class='t'>{t}</div></div>")
-A("<h2 style='margin-top:22px'>Командировка в Китай · Hytera</h2>")
+A("</div>")
+A(f"<div class='col' style='left:{c2}px;width:470px'><h2>Командировка в Китай · Hytera</h2>")
 for i, t in enumerate(["Окончательное согласование технического решения",
                        "Решение по АФУ по параметрам NTRA, вместе с инженерами Hytera",
                        "Сертификат проектировщика от Hytera",
