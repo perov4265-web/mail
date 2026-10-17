@@ -41,7 +41,7 @@
 <div id="toggle"><button id="tbtn">Панель</button></div>
 <div id="panel">
   <h1>Жилой городок АО «НЭПТ»</h1>
-  <div class="sub">3D: разметка основы по схеме генплана. 1 клетка сетки = 10 м.</div>
+  <div class="sub">3D: разметка основы по схеме генплана, масштаб 1:1000. 1 клетка сетки = 10 м.</div>
   <label><input type="checkbox" id="cbPlan" checked> Чертёж на земле (текстура)</label>
   <label><input type="checkbox" id="cbCurbs" checked> Бордюры и границы проездов</label>
   <label><input type="checkbox" id="cbBld" checked> Пятна застройки</label>
@@ -51,6 +51,7 @@
   <label><input type="checkbox" id="cbPark" checked> Парковка: зоны A / B</label>
   <label><input type="checkbox" id="cbCarport" checked> Навесы (зона A)</label>
   <label><input type="checkbox" id="cbGabion" checked> Габионы 1000×600</label>
+  <label><input type="checkbox" id="cbSigns" checked> Дорожные знаки на стойках</label>
   <hr>
   <button id="bTop">Вид сверху</button><button id="bIso">Общий вид</button><button id="bPark">К парковке</button>
   <hr>
@@ -62,6 +63,7 @@
     <span class="sw" style="background:#6fbf73"></span><span>Парковка, зона B — открытая</span>
     <span class="sw" style="background:#444"></span><span>Ограждение (внешнее / внутреннее)</span>
     <span class="sw" style="background:#9a9a90"></span><span>Габионы</span>
+    <span class="sw" style="background:#0b4fb8"></span><span>Дорожные знаки (щит 700 мм на стойке 3 м)</span>
   </div>
   <hr>
   <details><summary>Допущения</summary><ul id="notes"></ul></details>
@@ -142,7 +144,7 @@ function applyPlan(){ ground.material = (document.getElementById('cbPlan').check
 // surroundings + grid
 const outer = new THREE.Mesh(new THREE.PlaneGeometry(3000, 3000), new THREE.MeshLambertMaterial({color: dark?0x3b4038:0xc9c7b3}));
 outer.rotation.x=-Math.PI/2; outer.position.set(cx,-0.05,-cy); outer.receiveShadow=true; scene.add(outer);
-const grid = new THREE.GridHelper(400, 40, dark?0x4a4f48:0xa8a89a, dark?0x3a3f38:0xb9b8aa); grid.position.set(cx, -0.03, -cy); grid.material.transparent=true; grid.material.opacity=0.6; scene.add(grid);
+const grid = new THREE.GridHelper(600, 60, dark?0x4a4f48:0xa8a89a, dark?0x3a3f38:0xb9b8aa); grid.position.set(cx, -0.03, -cy); grid.material.transparent=true; grid.material.opacity=0.6; scene.add(grid);
 // north arrow
 { const g = new THREE.Group(); const sh = new THREE.Shape(); sh.moveTo(0,0); sh.lineTo(-3,-8); sh.lineTo(0,-5); sh.lineTo(3,-8); sh.closePath();
   const m = new THREE.Mesh(new THREE.ShapeGeometry(sh), new THREE.MeshBasicMaterial({color:0xc0392b, side:THREE.DoubleSide}));
@@ -235,6 +237,46 @@ function makeGabionTexture(){
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS=t.wrapT=THREE.RepeatWrapping; return t;
 }
 
+
+// ---------- road signs on posts ----------
+const plateTexCache = {};
+function plateTexture(code){
+  if(plateTexCache[code]) return plateTexCache[code];
+  const c = document.createElement('canvas'); c.width = c.height = 256; const x = c.getContext('2d'); const [base, arg] = code.split('-');
+  const sq = (fill) => { x.fillStyle = fill; roundRect(x, 8, 8, 240, 240, 24); x.fill(); };
+  const circle = (r, fill) => { x.beginPath(); x.arc(128,128,r,0,7); x.fillStyle = fill; x.fill(); };
+  const text = (t, size, color, y=128) => { x.fillStyle = color; x.font = `bold ${size}px system-ui, Arial, sans-serif`; x.textAlign='center'; x.textBaseline='middle'; x.fillText(t, 128, y); };
+  if(base === '5.19.1' || base === '5.19.2'){ sq('#0b4fb8'); x.fillStyle='#fff'; x.beginPath(); x.moveTo(128,36); x.lineTo(236,222); x.lineTo(20,222); x.closePath(); x.fill();
+    x.strokeStyle='#111'; x.lineWidth=12; x.lineCap='round'; x.beginPath(); x.moveTo(128,110); x.lineTo(128,170); x.moveTo(128,170); x.lineTo(104,214); x.moveTo(128,170); x.lineTo(152,214); x.moveTo(100,140); x.lineTo(156,120); x.stroke(); x.beginPath(); x.arc(128,92,14,0,7); x.fillStyle='#111'; x.fill();
+    for(let i=0;i<4;i++){ x.fillStyle='#111'; x.fillRect(40+i*48, 196, 24, 12); } }
+  else if(base === '6.4'){ sq('#0b4fb8'); text('P', 190, '#fff', 136); }
+  else if(base === '2.4'){ x.fillStyle='#d8262c'; x.beginPath(); x.moveTo(128,244); x.lineTo(248,20); x.lineTo(8,20); x.closePath(); x.fill(); x.fillStyle='#fff'; x.beginPath(); x.moveTo(128,196); x.lineTo(206,46); x.lineTo(50,46); x.closePath(); x.fill(); }
+  else if(base === '2.5'){ x.fillStyle='#d8262c'; x.beginPath(); for(let i=0;i<8;i++){ const a=Math.PI/8+i*Math.PI/4; x.lineTo(128+120*Math.cos(a),128+120*Math.sin(a)); } x.closePath(); x.fill(); x.strokeStyle='#fff'; x.lineWidth=8; x.stroke(); text('STOP', 72, '#fff'); }
+  else if(base === '3.24'){ circle(120,'#d8262c'); circle(92,'#fff'); text(arg||'', 120, '#111', 134); }
+  else if(base === '2.1'){ x.fillStyle='#fff'; x.beginPath(); x.moveTo(128,4); x.lineTo(252,128); x.lineTo(128,252); x.lineTo(4,128); x.closePath(); x.fill(); x.fillStyle='#f5c400'; x.beginPath(); x.moveTo(128,44); x.lineTo(212,128); x.lineTo(128,212); x.lineTo(44,128); x.closePath(); x.fill(); }
+  else if(base === '3.28'){ circle(120,'#d8262c'); circle(92,'#0b4fb8'); x.strokeStyle='#d8262c'; x.lineWidth=22; x.beginPath(); x.moveTo(52,52); x.lineTo(204,204); x.stroke(); }
+  else { sq('#0b4fb8'); text(base, 64, '#fff'); }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; plateTexCache[code] = t; return t;
+}
+const SG = site.signs; const postMat = new THREE.MeshStandardMaterial({color:0x6c7075, metalness:0.7, roughness:0.4});
+const backMat = new THREE.MeshLambertMaterial({color:0x9a9ea3});
+const arrowSegs = []; (site.traffic_arrows||[]).forEach(pl => { for(let i=0;i<pl.length-1;i++) arrowSegs.push([pl[i], pl[i+1]]); });
+function nearestArrowAngle(p){ let best=1e9, ang=0; for(const [a,b] of arrowSegs){ const mx=(a[0]+b[0])/2, my=(a[1]+b[1])/2; const d=Math.hypot(mx-p[0], my-p[1]); if(d<best){ best=d; ang=Math.atan2(b[1]-a[1], b[0]-a[0]); } } return ang; }
+SG.items.forEach(sg => {
+  const g = new THREE.Group(); const H = SG.post_height_m;
+  const post = new THREE.Mesh(new THREE.CylinderGeometry(SG.post_dia_m/2, SG.post_dia_m/2, H, 12), postMat); post.position.y = H/2; post.castShadow = true; post.userData = sg; bldMeshes.push(post); g.add(post);
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.25, 0.1, 12), backMat); base.position.y = 0.05; g.add(base);
+  sg.plates.forEach((code, k) => {
+    const sz = SG.plate_size_m, y = SG.top_plate_center_m - k*(sz+0.05);
+    const front = new THREE.Mesh(new THREE.PlaneGeometry(sz, sz), new THREE.MeshBasicMaterial({map: plateTexture(code), transparent:true}));
+    const back = new THREE.Mesh(new THREE.PlaneGeometry(sz, sz), backMat); back.rotation.y = Math.PI; back.position.z = -0.006; front.position.z = 0.006;
+    const pl = new THREE.Group(); pl.add(front, back); pl.position.set(0, y, 0.05); pl.userData = sg; front.userData = sg; bldMeshes.push(front); g.add(pl);
+  });
+  // face oncoming traffic along the nearest arrow (two-sided plates make the sign readable either way)
+  const ang = nearestArrowAngle(sg.pos); g.rotation.y = ang + Math.PI/2;
+  g.position.copy(v3(sg.pos, 0)); G('signs').add(g);
+});
+
 // ---------- labels ----------
 function label(text, pos, color, size=4, y=1){
   const c = document.createElement('canvas'); const x = c.getContext('2d'); const fs = 48; x.font = `bold ${fs}px system-ui, sans-serif`;
@@ -250,16 +292,16 @@ function centroid(poly){ let A=0,X=0,Y=0; for(let i=0;i<poly.length;i++){ const 
 // ---------- UI ----------
 const bind = (id, grp, fn) => document.getElementById(id).addEventListener('change', e => { if(grp) groups[grp].visible = e.target.checked; if(fn) fn(e.target.checked); });
 bind('cbPlan', null, applyPlan); bind('cbCurbs','curbs'); bind('cbBld','bld'); bind('cbVol', null, setVolumes); bind('cbLabels','labels');
-bind('cbFence','fence'); bind('cbPark','park'); bind('cbCarport','carport'); bind('cbGabion','gabion');
+bind('cbFence','fence'); bind('cbPark','park'); bind('cbCarport','carport'); bind('cbGabion','gabion'); bind('cbSigns','signs');
 document.getElementById('tbtn').onclick = () => document.getElementById('panel').classList.toggle('open');
 const notes = document.getElementById('notes');
-[site.meta.scale_note, site.meta.axes, 'Высоты зданий — предварительные, для режима «Объёмы».', site.carports[0].note, site.gabions[0].note + ` Длина ${site.gabions[0].length_m} м, ${site.gabions[0].count} шт.`,
- 'Зона A — места 1–10 (ближе к КПП 10.1), зона B — места 11–19.'].forEach(t => { const li = document.createElement('li'); li.textContent = t; notes.appendChild(li); });
+[site.meta.scale_note, site.meta.axes, 'Высоты зданий — предварительные, для режима «Объёмы».', site.carports[0].note, site.gabions[0].note + ` По ${site.gabions[0].count} шт. (${site.gabions[0].length_m} м) в каждом ряду.`,
+ `Зона A — ${site.parking.zones[0].stalls.length} мест (ближе к КПП 10.1), зона B — ${site.parking.zones[1].stalls.length} мест; граница смещается в site.json.`, site.signs.note].forEach(t => { const li = document.createElement('li'); li.textContent = t; notes.appendChild(li); });
 function flyTo(pos, target){ camera.position.copy(pos); controls.target.copy(target); controls.update(); }
 const qs = new URLSearchParams(location.search); if(qs.get('cam') && qs.get('at')){ const n = s => s.split(',').map(Number); setTimeout(() => flyTo(new THREE.Vector3(...n(qs.get('cam'))), new THREE.Vector3(...n(qs.get('at')))), 0); }
-document.getElementById('bTop').onclick = () => flyTo(new THREE.Vector3(cx, 330, -cy+0.01), new THREE.Vector3(cx,0,-cy));
-document.getElementById('bIso').onclick = () => flyTo(new THREE.Vector3(cx-110, 120, -cy+190), new THREE.Vector3(cx,0,-cy));
-document.getElementById('bPark').onclick = () => { const g = site.gabions[0].line[0]; flyTo(new THREE.Vector3(g[0]+34, 16, -g[1]-30), new THREE.Vector3(g[0]-6, 0.5, -g[1]-2)); };
+document.getElementById('bTop').onclick = () => flyTo(new THREE.Vector3(cx, 560, -cy+0.01), new THREE.Vector3(cx,0,-cy));
+document.getElementById('bIso').onclick = () => flyTo(new THREE.Vector3(cx-190, 210, -cy+330), new THREE.Vector3(cx,0,-cy));
+document.getElementById('bPark').onclick = () => { const c = centroid(site.parking.lot); flyTo(new THREE.Vector3(c[0]+48, 22, -c[1]-40), new THREE.Vector3(c[0]-4, 1, -c[1])); };
 ({top:'bTop', park:'bPark'}[new URLSearchParams(location.search).get('view')] ? document.getElementById({top:'bTop', park:'bPark'}[new URLSearchParams(location.search).get('view')]) : document.getElementById('bIso')).onclick();
 
 // click -> info
@@ -274,6 +316,7 @@ renderer.domElement.addEventListener('pointerup', e => {
   if(u.size_m) html += `<div class="m">Габариты ≈ ${u.size_m[0]} × ${u.size_m[1]} м, высота (предв.) ${u.height_m} м</div>`;
   if(u.stalls) html += `<div class="m">Мест: ${u.stalls.length}, ${u.covered?'под навесом':'открытая'}</div>`;
   if(u.box_m) html += `<div class="m">Короб ${u.box_m[0]*1000}×${u.box_m[2]*1000}×${u.box_m[1]*1000} мм, ${u.count} шт., ${u.fill}</div>`;
+  if(u.plates) html = `<b>Знак ${u.plates.join(' + ')}</b><div class="m">${u.names.join('; ')}. Положение: по ${u.placement}у на плане.</div>`;
   if(u.roof_height_front_m) html += `<div class="m">Высота ${u.roof_height_front_m}–${u.roof_height_back_m} м, стоек: ${u.columns_front.length+u.columns_back.length}</div>`;
   if(u.note) html += `<div class="m">${u.note}</div>`;
   info.innerHTML = html; info.style.display = 'block';
