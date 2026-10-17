@@ -36,7 +36,7 @@ h1 b {{ font-weight:700; }}
 .row {{ display:flex; gap:14px; font-size:13px; line-height:1.35; margin-bottom:9px; }}
 .row .k {{ flex:0 0 112px; font-weight:700; white-space:nowrap; }}
 .row .k.acc {{ color:{ACC}; }}
-.col {{ top:905px; }}
+.col {{ top:745px; }}
 .row .t {{ color:{INK}; }}
 .row .t small {{ color:{MUTE}; }}
 .li {{ display:flex; gap:10px; font-size:13px; line-height:1.35; margin-bottom:8px; }}
@@ -52,7 +52,7 @@ A("<div class='cap'>T0 — вступление Договора в силу · 
 A(f"<div class='big'><div class='v'>{usd(TOTAL)} USD</div><div class='l'>3 партии · 56 комплектов · последняя поставка T0 + {LOTS[2]['S']+DP} дн</div></div>")
 
 # ---------------- main timeline ----------------
-top, h = 175, 690
+top, h = 175, 540
 A(f"<svg class='abs' style='left:0;top:{top}px' width='{W}' height='{h}'>")
 x0, x1 = 390, W - 110
 DMAX = 215
@@ -71,7 +71,7 @@ A(f"<line x1='{xa:.1f}' y1='{ay}' x2='{xa:.1f}' y2='{h-70}' stroke='{INK}' strok
 A(f"<text x='{xa+6:.1f}' y='{h-76}' font-size='11' fill='{MUTE}'>A = T0 + 10 дн</text>")
 
 # lot rows
-ry, rh = 100, 150
+ry, rh = 92, 100
 for i, lot in enumerate(LOTS):
     y = ry + i * rh
     S, D = lot["S"], lot["S"] + DP
@@ -112,14 +112,22 @@ for d, t, s in ((0, "Допсоглашение с АСЭ", "срок не оп�
 A("</svg>")
 
 # ---------------- columns ----------------
-c1, c2, c3 = 70, 600, 1120
-A(f"<div class='col' style='left:{c1}px;width:470px'><h2 class='acc'>Проблемы</h2>")
+c1, c2, c3 = 70, 530, 1160
+A(f"<div class='col' style='left:{c1}px;width:420px'><h2 class='acc'>Проблемы</h2>")
 for k, t in [("1 мес", "шифрование радиооборудования влияет на таможенный выпуск"),
              ("до НГ", "разработка 16 и согласование 27 комплектов РД"),
              ("—", "допсоглашение с АСЭ: подготовка и согласование")]:
     A(f"<div class='row'><div class='k acc' style='flex-basis:60px'>{k}</div><div class='t'>{t}</div></div>")
 A("</div>")
-A(f"<div class='col' style='left:{c2}px;width:470px'><h2>Командировка в Китай · Hytera</h2>")
+A(f"<div class='col' style='left:{c2}px;width:580px'><h2>Шифрование · хронология</h2>")
+for k, t, acc in [("08.02.2026", "совещание, вопрос поднят", False),
+                  ("09.05.2026", "материалы по шифрованию подготовлены и переданы", False),
+                  ("22.06.2026", "NPPA официально принял материалы", False),
+                  ("сентябрь", "по нашим сведениям NPPA передал запрос только в сентябре", True)]:
+    A(f"<div class='row'><div class='k{' acc' if acc else ''}'>{k}</div><div class='t'>{t}</div></div>")
+A(f"<div class='row' style='margin-top:12px'><div class='k acc'>Проблема</div><div class='t'>на вопросы и попытки уточнить информацию по шифрованию NPPA не отвечает, ссылаясь на секретность</div></div>")
+A("</div>")
+A(f"<div class='col' style='left:{c3}px;width:360px'><h2>Командировка в Китай · Hytera</h2>")
 for i, t in enumerate(["Окончательное согласование технического решения",
                        "Решение по АФУ по параметрам NTRA, вместе с инженерами Hytera",
                        "Сертификат проектировщика от Hytera",
