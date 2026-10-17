@@ -12,7 +12,7 @@ html = (root / 'index.html').read_text(encoding='utf-8')
 m = re.search(r'<script type="module">\n(.*?)</script>', html, re.S); app = m.group(1)
 with tempfile.TemporaryDirectory() as td:
     src = pathlib.Path(td) / 'app.js'
-    src.write_text(app.replace("from './js/building.js'", f"from '{(root / 'js' / 'building.js').as_posix()}'"), encoding='utf-8')
+    src.write_text(re.sub(r"from '\./js/([\w.-]+)'", lambda m: f"from '{(root / 'js' / m.group(1)).as_posix()}'", app), encoding='utf-8')   # все локальные модули
     bundle = pathlib.Path(td) / 'bundle.js'
     subprocess.run([*esbuild, str(src), '--bundle', '--format=esm', '--minify', '--charset=utf8', '--log-level=warning',
                     f'--alias:three={(three / "build" / "three.module.js").as_posix()}',
@@ -23,6 +23,12 @@ tex = root / site['meta']['texture']['file']
 site['meta']['texture']['file'] = 'data:image/jpeg;base64,' + base64.b64encode(tex.read_bytes()).decode()
 inline = {'data/site.json': site}
 for n in ('abk1', 'abk2', 'mosque'): inline[f'data/{n}.json'] = json.loads((root / 'data' / f'{n}.json').read_text(encoding='utf-8'))
+lp = root / 'data' / 'landscape.json'
+if lp.exists():   # озеленение: текстура клумбы тоже встраивается
+    land = json.loads(lp.read_text(encoding='utf-8'))
+    for fb in land.get('flowerbeds', []):
+        f = root / fb['texture']; fb['texture'] = 'data:image/png;base64,' + base64.b64encode(f.read_bytes()).decode()
+    inline['data/landscape.json'] = land
 loader = ('<script>const __INLINE=' + json.dumps(inline, ensure_ascii=False, separators=(',', ':')).replace('</', '<\\/') +
           ';const __fetch=window.fetch.bind(window);window.fetch=(u,...a)=>(typeof u==="string"&&u in __INLINE)?Promise.resolve(new Response(JSON.stringify(__INLINE[u]),{headers:{"content-type":"application/json"}})):__fetch(u,...a);</script>\n')
 html = re.sub(r'<script type="importmap">.*?</script>\n', '', html, flags=re.S)

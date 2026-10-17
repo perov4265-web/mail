@@ -1,14 +1,4 @@
 {
- "mosque_ne": {
-  "request_id": 55901221,
-  "status": "success",
-  "model": "nano-banana-2",
-  "submit": null,
-  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792233796_6ad35144a38dd.jpg",
-  "cost": 20,
-  "runtime": 15.81,
-  "saved": true
- },
  "mosque_canopy": {
   "request_id": 55901223,
   "status": "success",
@@ -397,6 +387,56 @@
   "url": "https://gen-api.storage.yandexcloud.net/input_files/1792238498_6ad363a2a0a48.jpg",
   "cost": 20,
   "runtime": 17.05,
+  "saved": true
+ },
+ "mosque_ne__v1": {
+  "request_id": 55901221,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792233796_6ad35144a38dd.jpg",
+  "cost": 20,
+  "runtime": 15.81,
+  "saved": true
+ },
+ "mosque_bed": {
+  "request_id": 55906813,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792240648_6ad36c08b6ca5.jpg",
+  "cost": 20,
+  "runtime": 14.81,
+  "saved": true
+ },
+ "mosque_bed_aerial": {
+  "request_id": 55906814,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792240650_6ad36c0ab7dc5.jpg",
+  "cost": 20,
+  "runtime": 16.84,
+  "saved": true
+ },
+ "mosque_ne__v2": {
+  "request_id": 55906810,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792240647_6ad36c07a331c.jpg",
+  "cost": 20,
+  "runtime": 15.72,
+  "saved": true
+ },
+ "mosque_ne": {
+  "request_id": 55906856,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792240697_6ad36c399fc5a.jpg",
+  "cost": 20,
+  "runtime": 15.77,
   "saved": true
  }
 }

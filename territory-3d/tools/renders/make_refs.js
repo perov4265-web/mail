@@ -11,6 +11,7 @@ const VIEWS = {
   mosque_ne: 'view=mosque', mosque_canopy: 'cam=46,2.2,-112&at=35,1.5,-118.6',
   mosque_entrance: 'cam=34,1.8,-131&at=33,1.5,-120', mosque_aerial: 'cam=22,24,-100&at=32,0,-118.6',
   mosque_interior: 'roof=0&cam=38,2.6,-123.5&at=29,1.0,-117', mosque_hall: 'cam=30.9,1.6,-116.0&at=26.7,0.7,-121.3',
+  mosque_bed: 'cam=33.5,2.2,-133.5&at=32.4,0.6,-125.5', mosque_bed_aerial: 'cam=37,9,-134&at=32.5,0,-127',   // клумба-орнамент перед входом
   temple_nave: 'finish=wood&' + FRONT, temple_trusses: 'cam=124.5,1.6,-266&at=114,2.9,-254',
   temple_stasidia: 'cam=118.6,1.6,-255.2&at=113.4,1.5,-262',
   temple_open_trusses: 'finish=wood_open&cam=114.6,1.4,-258.6&at=118.6,2.7,-256.0',   // узел колонна–косынка–ферма, вариант 2б
@@ -33,7 +34,7 @@ for (const f of ['white', 'wood', 'wood_open', 'wood_glass', 'stucco', 'icons', 
       __scene.children.forEach(o => { if (o.type === 'GridHelper') o.visible = false; });         // сетка
       __scene.children.forEach(o => { if (o.type === 'Group' && o.children.some(c => c.isSprite) && o.children.some(c => c.isMesh)) o.visible = false; }); // стрелка севера
       __scene.children.forEach(o => { if (o.type === 'Line' || o.type === 'LineSegments' || o.type === 'Line2') o.visible = false; }); // граница участка
-    }, /^(park_|mosque_(ne|canopy|entrance|aerial))/.test(n));
+    }, /^(park_|mosque_(ne|canopy|entrance|aerial|bed))/.test(n));
     await p.waitForTimeout(4000);
     await p.screenshot({ path: path.join(ROOT, 'renders', n + '.jpg'), type: 'jpeg', quality: 92 });
     await p.close(); console.log('ok', n);

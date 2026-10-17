@@ -58,6 +58,7 @@
   <label><input type="checkbox" id="cbCarport" checked> Навесы (зона A)</label>
   <label><input type="checkbox" id="cbGabion" checked> Габионы 1,0 × 0,6 м</label>
   <label><input type="checkbox" id="cbSigns" checked> Дорожные знаки на стойках</label>
+  <label><input type="checkbox" id="cbGreen" checked> Озеленение у мечети (клумба-орнамент, кусты)</label>
   <label><input type="checkbox" id="cbDetail" checked> АБК-1 и АБК-2 детально (стены, окна, мебель, фермы)</label>
   <label><input type="checkbox" id="cbRoof" checked> Кровли АБК (снять, чтобы видеть планировку)</label>
   <label><input type="checkbox" id="cbTruss" checked> Фермы и прогоны АБК-2</label>
@@ -103,10 +104,12 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { buildDetailedBuilding } from './js/building.js';
+import { buildLandscape } from './js/landscape.js';
 
 const DATA_URL = 'data/site.json';
 const site = await (await fetch(DATA_URL)).json();
 const abks = (await Promise.all(['data/abk1.json', 'data/abk2.json', 'data/mosque.json'].map(u => fetch(u).then(r => r.ok ? r.json() : null).catch(() => null)))).filter(Boolean);
+const landscape = await fetch('data/landscape.json').then(r => r.ok ? r.json() : null).catch(() => null);
 const T = site.meta.texture;
 const W = T.x1 - T.x0, H = T.y1 - T.y0;
 const cx = W/2, cy = H/2;
@@ -271,6 +274,9 @@ site.carports.forEach(cp => {
   g.userData = cp; roof.userData = cp; bldMeshes.push(roof); G('carport').add(g);
 });
 
+// ---------- landscape (flowerbed with the ornament, flowering bushes) ----------
+if(landscape){ const lg = buildLandscape(landscape, u => new THREE.TextureLoader().load(u)); lg.traverse(o => { if(o.isMesh && o.userData && o.userData.name) bldMeshes.push(o); }); G('green').add(lg); }
+
 // ---------- gabions ----------
 const gabTex = makeGabionTexture();
 site.gabions.forEach(gb => {
@@ -353,7 +359,7 @@ function centroid(poly){ let A=0,X=0,Y=0; for(let i=0;i<poly.length;i++){ const 
 // ---------- UI ----------
 const bind = (id, grp, fn) => document.getElementById(id).addEventListener('change', e => { if(grp) groups[grp].visible = e.target.checked; if(fn) fn(e.target.checked); });
 bind('cbPlan', null, applyPlan); bind('cbCurbs','curbs'); bind('cbBld','bld'); bind('cbVol', null, setVolumes); bind('cbLabels','labels');
-bind('cbFence','fence'); bind('cbPark','park'); bind('cbCarport','carport'); bind('cbGabion','gabion'); bind('cbSigns','signs'); bind('cbDetail', null, setDetail); bind('cbRoof', null, setRoofs); bind('cbTruss', null, setTrusses);
+bind('cbFence','fence'); bind('cbPark','park'); bind('cbCarport','carport'); bind('cbGabion','gabion'); bind('cbGreen','green'); bind('cbSigns','signs'); bind('cbDetail', null, setDetail); bind('cbRoof', null, setRoofs); bind('cbTruss', null, setTrusses);
 function flyToBuilding(id, dist){ const b = site.buildings.find(x => x.id === id); if(!b) return; const c = centroid(b.footprint); flyTo(new THREE.Vector3(c[0]+dist, dist*0.6, -c[1]+dist), new THREE.Vector3(c[0], 1.5, -c[1])); }
 document.getElementById('bAbk1').onclick = () => flyToBuilding('1', 38);
 document.getElementById('bAbk2').onclick = () => flyToBuilding('2.1', 45);
