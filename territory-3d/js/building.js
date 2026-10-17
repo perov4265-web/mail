@@ -156,8 +156,20 @@ export function buildDetailedBuilding(abk, footprint, opts = {}) {
     // purlins along the length on each slope
     const pur = t.purlins || 5;
     for (let k = 0; k <= pur; k++) { [1, -1].forEach(s => { const y = Ly / 2 + s * (Ly / 2) * k / pur; const z = topAt(y) + 0.02; trussG.add(member([0, y, z], [Lx, y, z])); }); }
-    // eave band (fascia)
-    [0, Ly].forEach(y => roofG.add(box(Lx + 2 * ov, 0.25, 0.05, MAT.parapet, Lx / 2, eave - 0.1, -(y === 0 ? -ov : Ly + ov))));
+    if (roof.band) {
+      // perimeter band like АБК-1's parapet: vertical sheet from the eave up to the ridge on all four sides, hiding the slopes
+      const b0 = roof.band.from !== undefined ? roof.band.from : eave, b1 = roof.band.to !== undefined ? roof.band.to : ridge;
+      const bh = b1 - b0, bc = (b0 + b1) / 2, bt = 0.06;
+      roofG.add(box(Lx + 2 * ov + bt, bh, bt, MAT.parapet, Lx / 2, bc, ov));
+      roofG.add(box(Lx + 2 * ov + bt, bh, bt, MAT.parapet, Lx / 2, bc, -(Ly + ov)));
+      roofG.add(box(bt, bh, Ly + 2 * ov + bt, MAT.parapet, -ov, bc, -Ly / 2));
+      roofG.add(box(bt, bh, Ly + 2 * ov + bt, MAT.parapet, Lx + ov, bc, -Ly / 2));
+      // flat cap between the band and the slopes along the eaves so the box reads closed from above
+      [[ov, 0], [Ly + ov, Ly]].forEach(([yo, yi]) => { const d = Math.abs(yo - yi); roofG.add(box(Lx + 2 * ov, 0.05, d, MAT.roof, Lx / 2, eave, -(yo + yi) / 2)); });
+    } else {
+      // eave band (fascia)
+      [0, Ly].forEach(y => roofG.add(box(Lx + 2 * ov, 0.25, 0.05, MAT.parapet, Lx / 2, eave - 0.1, -(y === 0 ? -ov : Ly + ov))));
+    }
   }
   // labels (room names) as small sprites
   if (opts.label && abk.labels) abk.labels.forEach(l => { const s = opts.label(l.s, [l.p[0], l.p[1]], 0x334455, 0.9, H + 0.3); s.position.copy(L(l.p[0], l.p[1], 0.9)); g.add(s); });
