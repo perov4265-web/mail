@@ -207,8 +207,17 @@ export function buildTemple(T) {
   // trusses: positions along the hall at the truss pitch (building grid), bottom chord at `chord`
   const trussX = []; if (T.truss_pitch) { for (let x = 0; x <= x1 + 0.01; x += T.truss_pitch) if (x >= x0 - 0.05 && x <= x1 + 0.05) trussX.push(x); }
   if (T.trussMat) T.trussMat.color.set(F === 'stucco' ? '#e8dcc0' : F === 'wood' ? '#eee8dc' : '#f2f1ec');
-  if (F === 'wood') trussX.forEach(x => g.add(box(0.24, 0.24, Ly, WOOD2, x, chord, -(y0 + Ly / 2))));               // oak casing of the bottom chords
-  if (F === 'stucco') trussX.forEach(x => { g.add(box(0.14, 0.14, Ly, GOLD, x, chord, -(y0 + Ly / 2))); });          // gilded bottom chords, cream members
+  if (F === 'wood' || F === 'stucco') {   // full truss casing: a solid profile from the bottom chord up to the roof, 0.3 m thick, gilded moulding along the bottom edge
+    const topY = y => (T.topAt ? T.topAt(y - y0) : chord + 0.3) - 0.02;
+    trussX.forEach(x => {
+      const sh = new THREE.Shape(); sh.moveTo(y0, chord - 0.12); sh.lineTo(y1, chord - 0.12); sh.lineTo(y1, topY(y1));
+      for (let k = 10; k >= 0; k--) { const y = y0 + (y1 - y0) * k / 10; sh.lineTo(y, topY(y)); } sh.closePath();
+      const geo = new THREE.ExtrudeGeometry(sh, {depth: 0.3, bevelEnabled: false}); geo.rotateY(Math.PI / 2);   // shape (y->X, z->Y) extruded along -Z... -> after rotation: extrude along +X, shape y along -Z
+      const m = new THREE.Mesh(geo, F === 'wood' ? WOOD2 : new THREE.MeshLambertMaterial({color: 0xe8dcc0})); m.position.set(x - 0.15, 0, 0); m.castShadow = true; g.add(m);
+      g.add(box(0.36, 0.06, Ly, GOLD, x, chord - 0.13, -(y0 + Ly / 2)));
+      g.add(box(0.34, 0.1, Ly, F === 'wood' ? WOOD : new THREE.MeshLambertMaterial({color: 0xd8ccae}), x, chord - 0.05, -(y0 + Ly / 2)));
+    });
+  }
   if (F === 'ceiling') {                                                                                                // suspended painted ceiling below the trusses
     const cm = new THREE.MeshLambertMaterial({map: tex(1024, 1024, (x, w, h) => { x.fillStyle = '#f3efe4'; x.fillRect(0, 0, w, h); x.strokeStyle = '#d9b45a'; x.lineWidth = 14; x.strokeRect(40, 40, w - 80, h - 80); x.strokeStyle = '#8aa7c8'; x.lineWidth = 6; x.strokeRect(80, 80, w - 160, h - 160); for (let k = 0; k < 60; k++) leaf(x, 120 + rnd() * (w - 240), 120 + rnd() * (h - 240), 16 + rnd() * 24, PAL[Math.floor(rnd() * PAL.length)] + 'aa'); x.strokeStyle = '#d9b45a'; x.lineWidth = 8; x.beginPath(); x.arc(w / 2, h / 2, 170, 0, 7); x.stroke(); }, [Lx / 3.1, Ly / 3.1]), side: THREE.DoubleSide});
     const m = new THREE.Mesh(new THREE.PlaneGeometry(Lx, Ly), cm); m.rotation.x = Math.PI / 2; m.position.set(x0 + Lx / 2, chord - 0.06, -(y0 + Ly / 2)); g.add(m);
