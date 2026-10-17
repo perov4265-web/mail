@@ -2500,8 +2500,8 @@
   }
  ],
  "temple": {
-  "x0": 34.27,
-  "x1": 49.77,
+  "x0": 33.707,
+  "x1": 49.345,
   "y0": 0.17,
   "y1": 13.17,
   "sanctuary_depth": 5.3,
@@ -2540,7 +2540,7 @@
     7.72
    ]
   ],
-  "finish": "wood"
+  "finish": "wood_glass"
  },
  "roof": {
   "type": "gable",

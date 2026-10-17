@@ -76,6 +76,17 @@ function iconTexture(i) {
     x.fillStyle = '#8a1e1e'; x.font = 'bold 22px serif'; x.textAlign = 'center'; x.fillText(i % 2 ? 'IC XC' : 'ΜΡ ΘΥ', w / 2, 60);
   });
 }
+function stainedGlassTexture() { // leaded glass: coloured cells with dark leading, warm palette
+  return tex(512, 256, (x, w, h) => {
+    const cols = ['#c8403a', '#2c6fb3', '#e0b43a', '#3d8a4f', '#8b3f9c', '#e07a2e', '#4bb0c9'];
+    for (let i = 0; i < 12; i++) for (let j = 0; j < 6; j++) { x.fillStyle = cols[(i * 7 + j * 3) % cols.length]; x.fillRect(i * 43, j * 43, 43, 43); }
+    x.strokeStyle = '#2a2320'; x.lineWidth = 5;
+    for (let i = 0; i <= 12; i++) { x.beginPath(); x.moveTo(i * 43, 0); x.lineTo(i * 43, h); x.stroke(); }
+    for (let j = 0; j <= 6; j++) { x.beginPath(); x.moveTo(0, j * 43); x.lineTo(w, j * 43); x.stroke(); }
+    for (let k = 0; k < 10; k++) { x.beginPath(); x.arc(40 + k * 48, 128, 60, 0, 7); x.stroke(); }
+    x.fillStyle = 'rgba(255,255,255,0.18)'; for (let k = 0; k < 40; k++) x.fillRect(rnd() * w, rnd() * h, 20, 8);
+  }, [1, 1]);
+}
 function latticeTexture() {
   return tex(256, 512, (x, w, h) => { x.fillStyle = '#7a1f2b'; x.fillRect(0, 0, w, h); x.strokeStyle = '#d9b45a'; x.lineWidth = 6;
     for (let k = -h; k < w + h; k += 40) { x.beginPath(); x.moveTo(k, 0); x.lineTo(k + h, h); x.stroke(); x.beginPath(); x.moveTo(k + h, 0); x.lineTo(k, h); x.stroke(); } });
@@ -194,7 +205,7 @@ export function buildTemple(T) {
   const marble = new THREE.MeshStandardMaterial({color: 0xcfc6b8, roughness: 0.3, metalness: 0.05});
   (T.columns || []).forEach(([x, y]) => {
     const h = colH(y);
-    if (F === 'wood' || F === 'wood_open') {            // oak casing with plinth and capital
+    if (F === 'wood' || F === 'wood_open' || F === 'wood_glass') {            // oak casing with plinth and capital
       g.add(box(0.32, h, 0.32, WOOD2, x, h / 2, -y)); g.add(box(0.46, 0.3, 0.46, WOOD, x, 0.15, -y)); g.add(box(0.46, 0.18, 0.46, WOOD, x, h - 0.09, -y)); g.add(box(0.4, 0.04, 0.4, GOLD, x, h - 0.2, -y));
     } else if (F === 'icons') {    // oak casing carrying icons on four sides, gilded cornice
       g.add(box(0.36, h, 0.36, WOOD2, x, h / 2, -y)); g.add(box(0.5, 0.25, 0.5, WOOD, x, 0.125, -y)); g.add(box(0.5, 0.12, 0.5, GOLD, x, 2.55, -y));
@@ -209,16 +220,23 @@ export function buildTemple(T) {
   });
   // trusses: positions along the hall at the truss pitch (building grid), bottom chord at `chord`
   const trussX = []; if (T.truss_pitch) { for (let x = 0; x <= x1 + 0.01; x += T.truss_pitch) if (x >= x0 - 0.05 && x <= x1 + 0.05) trussX.push(x); }
-  if (T.trussMat) T.trussMat.color.set(F === 'stucco' ? '#e8dcc0' : (F === 'wood' || F === 'wood_open') ? '#eee8dc' : '#f2f1ec');
-  if (F === 'wood_open') {   // cladding follows the members: oak boxes around chords, verticals and diagonals; voids stay open
-    const topY = y => (T.topAt ? T.topAt(y - y0) : chord + 0.3) - 0.14;
-    const mem = (p, q, sz = 0.18) => { const a = L(...p), b = L(...q); const len = a.distanceTo(b) + sz; const m = new THREE.Mesh(new THREE.BoxGeometry(sz, sz, len), WOOD2); m.position.copy(a.clone().lerp(b, 0.5)); m.lookAt(b); m.castShadow = true; g.add(m); return m; };
+  if (T.trussMat) T.trussMat.color.set(F === 'stucco' ? '#e8dcc0' : (F === 'wood' || F === 'wood_open' || F === 'wood_glass') ? '#eee8dc' : '#f2f1ec');
+  if (F === 'wood_open' || F === 'wood_glass') {   // cladding follows the members exactly (same geometry as the steel truss): oak boxes around chords, verticals and diagonals
+    const topY = y => (T.topAt ? T.topAt(y - y0) : chord + 0.3);           // = top chord axis of the building truss
     const L = (x, y, h) => new THREE.Vector3(x, h, -y);
+    const mem = (p, q, sz = 0.2) => { const a = L(...p), b = L(...q); const len = a.distanceTo(b) + sz * 0.6; const m = new THREE.Mesh(new THREE.BoxGeometry(sz, sz, len), WOOD2); m.position.copy(a.clone().lerp(b, 0.5)); m.lookAt(b); m.castShadow = true; g.add(m); return m; };
+    const glassMat = F === 'wood_glass' ? new THREE.MeshBasicMaterial({map: stainedGlassTexture(), transparent: true, opacity: 0.92, side: THREE.DoubleSide}) : null;
+    const panels = 6;
     trussX.forEach(x => {
-      mem([x, y0, chord], [x, y1, chord], 0.24); g.add(box(0.3, 0.05, Ly, GOLD, x, chord - 0.145, -(y0 + Ly / 2)));
-      mem([x, y0, topY(y0)], [x, y0 + Ly / 2, topY(y0 + Ly / 2)]); mem([x, y0 + Ly / 2, topY(y0 + Ly / 2)], [x, y1, topY(y1)]);
-      const panels = 6; for (let k = 0; k <= panels; k++) { const y = y0 + Ly * k / panels; if (topY(y) - chord > 0.2) mem([x, y, chord], [x, y, topY(y)], 0.14);
-        if (k < panels) { const y2 = y0 + Ly * (k + 1) / panels; g.add(k % 2 === 0 ? mem([x, y, chord], [x, y2, topY(y2)], 0.12) : mem([x, y, topY(y)], [x, y2, chord], 0.12)); } }
+      mem([x, y0, chord], [x, y1, chord], 0.28); g.add(box(0.34, 0.05, Ly, GOLD, x, chord - 0.165, -(y0 + Ly / 2)));
+      mem([x, y0, topY(y0)], [x, y0 + Ly / 2, topY(y0 + Ly / 2)], 0.24); mem([x, y0 + Ly / 2, topY(y0 + Ly / 2)], [x, y1, topY(y1)], 0.24);
+      for (let k = 0; k <= panels; k++) { const y = y0 + Ly * k / panels; if (topY(y) - chord > 0.2) mem([x, y, chord], [x, y, topY(y)], 0.18);
+        if (k < panels) { const y2 = y0 + Ly * (k + 1) / panels; k % 2 === 0 ? mem([x, y, chord], [x, y2, topY(y2)], 0.16) : mem([x, y, topY(y)], [x, y2, chord], 0.16);
+          if (glassMat && Math.min(topY(y), topY(y2)) - chord > 0.3) {   // stained glass filling the panel (quad between chords), lit from behind by the ceiling lights
+            const sh = new THREE.Shape(); sh.moveTo(y - y0, chord + 0.1); sh.lineTo(y2 - y0, chord + 0.1); sh.lineTo(y2 - y0, topY(y2) - 0.08); sh.lineTo(y - y0, topY(y) - 0.08); sh.closePath();
+            const gm = new THREE.Mesh(new THREE.ShapeGeometry(sh), glassMat); gm.rotation.y = Math.PI / 2; gm.position.set(x, 0, -y0); g.add(gm);
+            const gl = new THREE.PointLight(0xffe9c4, 3, 6, 1.5); gl.position.set(x, chord + 0.6, -(y + y2) / 2); g.add(gl);
+          } } }
     });
   }
   if (F === 'wood' || F === 'stucco') {   // full truss casing: a solid profile from the bottom chord up to the roof, 0.3 m thick, gilded moulding along the bottom edge

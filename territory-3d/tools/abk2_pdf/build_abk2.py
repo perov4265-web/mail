@@ -119,11 +119,17 @@ for c in R['furn']:
 # 8 columns in the temple hall: axes 13–16 on grid lines B and C (corridor lines), trusses keep the uniform 3.1 m pitch
 columns=[[round(EXT+3.1*i,3), round(yc,3)] for i in range(12,16) for yc in (EXT+5.45, EXT+5.45+2.1)]
 labels=[{'s':'Храм','p':[round((hall[0]+hall[1])/2,3),round(WID/2,3)]}]
+# temple hall bounds snapped to the digitised end walls (inner faces)
+def inner_face(xe, side):
+    cands=[w['rect'] for w in walls if w['src']=='v' and abs((w['rect'][0]+w['rect'][2])/2-xe)<0.8]
+    if not cands: return xe
+    r=min(cands,key=lambda r:abs((r[0]+r[2])/2-xe)); return round((r[2]+0.01) if side=='x0' else (r[0]-0.01),3)
+hall_in=(inner_face(hall[0],'x0'), inner_face(hall[1],'x1')); print('hall inner faces',hall_in)
 abk={'id':'ABK-2','name':'Административно-бытовой корпус №2 (АБК-2, удлинённый V.2)','placement':{'building':'2.1','rotation_deg':270},
  'source':'планировка и мебель — «АБК 2 удлинённый V.2.pdf» (растр, оцифровка); фасады, кровля, фермы — «Итог1.pdf» (91VVF)',
  'size_m':[round(LEN,3),round(WID,3)],'levels':{'wall_h':3.0,'window_sill':0.9,'window_head':2.1,'door_h':2.1},'wall_thickness_m':EXT,
  'walls':walls,'windows':windows,'doors':doors,'furniture':furn,'labels':labels,'porches':porches,
- 'temple':{'x0':round(hall[0],3),'x1':round(hall[1],3),'y0':EXT,'y1':round(WID-EXT,3),'sanctuary_depth':5.3,'altar_side':'y1','columns':columns,'finish':'wood'},
+ 'temple':{'x0':hall_in[0],'x1':hall_in[1],'y0':EXT,'y1':round(WID-EXT,3),'sanctuary_depth':5.3,'altar_side':'y1','columns':columns,'finish':'wood_glass'},
  'roof':{'type':'gable','eave':3.45,'ridge':4.35,'bottom_chord':3.0,'overhang':0.3,'band':{'from':3.0,'to':4.35},'truss':{'pitch':3.1,'member':0.08,'panels':6,'purlins':5,'color':'#f2f1ec'}},
  'notes':['Оси 12–17 — храм: зал на всю ширину без окон (по фото), 8 колонн по осям 13–16 на линиях B и C; иконостас вдоль восточной стены, алтарь 5,3 м (колонны ряда C стоят у кромки солеи — по фото); выходы в коридор в торцах сразу за иконостасом; отделка колонн и поясов — дуб','Двери кабинетов — по одной в коридорной стене каждого помещения (положение по растру приближённое)','Сетка 20 осей × 3,1 м (58,9 м) × 13,0 м (5,45 + 2,1 + 5,45) — по «Итог1», удлинение по V.2','Стены 110/100 мм, верх стен +3,000, карниз +3,450, конёк +4,350, уклон 0,12 — по разрезу 1-1 «Итог1»','Окантовка кровли — как у АБК-1: сплошной пояс по периметру от верха стен +3,00 до конька +4,35, фермы и прогоны снаружи не видны','Окна 1000 мм, подоконник +0,900, верх +2,100 — по фасадам «Итог1»; расставлены по одному на пролёт (на растровом плане V.2 окна не показаны)','Планировка, двери и мебель оцифрованы с растрового плана V.2 (точность ≈ ±0,1 м)']}
 json.dump(abk,open('/home/user/mail/territory-3d/data/abk2.json','w'),ensure_ascii=False,indent=1)
