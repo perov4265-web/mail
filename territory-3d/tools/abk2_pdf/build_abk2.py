@@ -109,7 +109,7 @@ for i in range(12,16):
     for yc in (EXT+5.45, EXT+5.45+2.1):
         furn.append({'rect':[round(xc-0.1,3),round(yc-0.1,3),round(xc+0.1,3),round(yc+0.1,3)],'h':3.0,'name':'колонна'})
 labels=[{'s':'Храм','p':[round((hall[0]+hall[1])/2,3),round(WID/2,3)]}]
-abk={'id':'ABK-2','name':'Административно-бытовой корпус №2 (АБК-2, удлинённый V.2)','placement':{'building':'2.1'},
+abk={'id':'ABK-2','name':'Административно-бытовой корпус №2 (АБК-2, удлинённый V.2)','placement':{'building':'2.1','rotation_deg':270},
  'source':'планировка и мебель — «АБК 2 удлинённый V.2.pdf» (растр, оцифровка); фасады, кровля, фермы — «Итог1.pdf» (91VVF)',
  'size_m':[round(LEN,3),round(WID,3)],'levels':{'wall_h':3.0,'window_sill':0.9,'window_head':2.1,'door_h':2.1},'wall_thickness_m':EXT,
  'walls':walls,'windows':windows,'doors':doors,'furniture':furn,'labels':labels,'porches':porches,
