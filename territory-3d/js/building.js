@@ -1,6 +1,7 @@
 // Detailed building renderer: walls with openings, windows, doors, furniture, roof (flat+parapet or gable with trusses).
 // Input: building JSON (local metres, origin at the SW corner, X along the length) and the site footprint polygon to place it on.
 import * as THREE from 'three';
+import { buildTemple } from './temple.js';
 
 const MAT = {
   wall: new THREE.MeshLambertMaterial({color: 0xe8e4d8}),
@@ -57,6 +58,8 @@ export function buildDetailedBuilding(abk, footprint, opts = {}) {
   const g = new THREE.Group();
   const H = abk.levels.wall_h;
   const walls = abk.walls;
+  if (abk.colors && abk.colors.wall) MAT.wall = new THREE.MeshLambertMaterial({color: new THREE.Color(abk.colors.wall)}); else MAT.wall = new THREE.MeshLambertMaterial({color: 0xe8e4d8});
+  const bandMat = abk.colors && abk.colors.band ? new THREE.MeshLambertMaterial({color: new THREE.Color(abk.colors.band)}) : MAT.parapet;
   const byWall = new Map();
   const addOp = (i, op) => { if (!byWall.has(i)) byWall.set(i, []); byWall.get(i).push(op); };
   (abk.windows || []).forEach(w => addOp(w.wall, {from: w.from, to: w.to, z0: w.sill, z1: w.head}));
@@ -99,7 +102,19 @@ export function buildDetailedBuilding(abk, footprint, opts = {}) {
   // furniture
   (abk.furniture || []).forEach(f => {
     const r = f.rect; const w = r[2] - r[0], d = r[3] - r[1];
-    g.add(box(w, f.h, d, f.h < 0.6 ? MAT.chair : MAT.furn, (r[0] + r[2]) / 2, f.h / 2, -(r[1] + r[3]) / 2));
+    let fm = f.color ? new THREE.MeshLambertMaterial({color: new THREE.Color(f.color)}) : (f.h < 0.6 ? MAT.chair : MAT.furn);
+    if (f.tex === 'green_carpet') {
+      const c = document.createElement('canvas'); c.width = 1024; c.height = 1024; const x = c.getContext('2d');
+      x.fillStyle = '#1f6b3a'; x.fillRect(0, 0, 1024, 1024);
+      x.strokeStyle = '#d4a843'; x.lineWidth = 18; x.strokeRect(24, 24, 976, 976); x.lineWidth = 5; x.strokeRect(54, 54, 916, 916);
+      const rows = Math.round(w / 1.2), cols = Math.round(d / 1.0);
+      for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) { const cx = 70 + (i + 0.5) * (884 / rows), cy = 70 + (j + 0.5) * (884 / cols), rw = 884 / rows * 0.36, rh = 884 / cols * 0.4;
+        x.strokeStyle = '#c9b25a'; x.lineWidth = 4; x.beginPath(); x.moveTo(cx - rw, cy + rh); x.lineTo(cx - rw, cy - rh * 0.3); x.quadraticCurveTo(cx - rw, cy - rh, cx, cy - rh); x.quadraticCurveTo(cx + rw, cy - rh, cx + rw, cy - rh * 0.3); x.lineTo(cx + rw, cy + rh); x.stroke();
+        x.fillStyle = '#2a7d47'; x.fillRect(cx - rw + 6, cy - rh * 0.3, rw * 2 - 12, rh * 1.3 - 6); }
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+      fm = new THREE.MeshLambertMaterial({map: t});
+    }
+    g.add(box(w, f.h, d, fm, (r[0] + r[2]) / 2, f.h / 2, -(r[1] + r[3]) / 2));
   });
   // floor slab
   const [Lx, Ly] = abk.size_m;
@@ -108,8 +123,8 @@ export function buildDetailedBuilding(abk, footprint, opts = {}) {
   (abk.porches || []).forEach(p => {
     const r = p.rect; g.add(box(r[2] - r[0], 0.12, r[3] - r[1], MAT.porch, (r[0] + r[2]) / 2, -0.06, -(r[1] + r[3]) / 2));
     if (p.canopy) { const ch = p.canopy_h || 2.4; g.add(box(r[2] - r[0] + 0.3, 0.08, r[3] - r[1] + 0.2, MAT.roof, (r[0] + r[2]) / 2, ch, -(r[1] + r[3]) / 2));
-      const px = [r[0] + 0.1, r[2] - 0.1], py = p.canopy_posts_y !== undefined ? p.canopy_posts_y : r[1] + 0.1;
-      px.forEach(x => g.add(box(0.08, ch, 0.08, MAT.steel, x, ch / 2, -py))); }
+      if (p.posts) p.posts.forEach(([x, y]) => g.add(box(0.1, ch, 0.1, MAT.steel, x, ch / 2, -y)));
+      else { const px = [r[0] + 0.1, r[2] - 0.1], py = p.canopy_posts_y !== undefined ? p.canopy_posts_y : r[1] + 0.1; px.forEach(x => g.add(box(0.08, ch, 0.08, MAT.steel, x, ch / 2, -py))); } }
   });
   // roof
   const roof = abk.roof || {type: 'flat_parapet', parapet_top: H + 1.2};
@@ -138,11 +153,12 @@ export function buildDetailedBuilding(abk, footprint, opts = {}) {
       m.rotation.y = -Math.PI / 2; m.position.set(x, eave, 0); m.castShadow = true; roofG.add(m); });
     // trusses at a uniform pitch along the length: bottom chord at `chord`, top chord 0.12 m under the sheet, verticals + diagonals
     const t = roof.truss || {}; const pitch = t.pitch || 3.1, mem = t.member || 0.08, off = 0.12;
-    const member = (p, q, mat = MAT.steel) => { const a = L(...p), b = L(...q); const len = a.distanceTo(b); const m = new THREE.Mesh(new THREE.BoxGeometry(mem, mem, len), mat);
+    const trussMat = t.color ? new THREE.MeshLambertMaterial({color: new THREE.Color(t.color)}) : MAT.steel; g.userData.trussMat = trussMat;
+    const member = (p, q, mat = trussMat) => { const a = L(...p), b = L(...q); const len = a.distanceTo(b); const m = new THREE.Mesh(new THREE.BoxGeometry(mem, mem, len), mat);
       m.position.copy(a.clone().lerp(b, 0.5)); m.lookAt(b); m.castShadow = true; return m; };
     const topAt = y => eave - off + (ridge - eave) * (1 - Math.abs(y - Ly / 2) / (Ly / 2));
     const x0 = t.first !== undefined ? t.first : 0;
-    for (let x = x0; x <= Lx + 0.01; x += pitch) {
+    for (let x = x0; roof.trusses !== false && x <= Lx + 0.01; x += pitch) {
       const xx = Math.min(x, Lx);
       trussG.add(member([xx, 0, chord], [xx, Ly, chord]));
       trussG.add(member([xx, 0, topAt(0)], [xx, Ly / 2, topAt(Ly / 2)])); trussG.add(member([xx, Ly / 2, topAt(Ly / 2)], [xx, Ly, topAt(Ly)]));
@@ -154,16 +170,16 @@ export function buildDetailedBuilding(abk, footprint, opts = {}) {
       }
     }
     // purlins along the length on each slope
-    const pur = t.purlins || 5;
+    const pur = roof.trusses === false ? -1 : (t.purlins || 5);
     for (let k = 0; k <= pur; k++) { [1, -1].forEach(s => { const y = Ly / 2 + s * (Ly / 2) * k / pur; const z = topAt(y) + 0.02; trussG.add(member([0, y, z], [Lx, y, z])); }); }
     if (roof.band) {
       // perimeter band like АБК-1's parapet: vertical sheet from the eave up to the ridge on all four sides, hiding the slopes
       const b0 = roof.band.from !== undefined ? roof.band.from : eave, b1 = roof.band.to !== undefined ? roof.band.to : ridge;
       const bh = b1 - b0, bc = (b0 + b1) / 2, bt = 0.06;
-      roofG.add(box(Lx + 2 * ov + bt, bh, bt, MAT.parapet, Lx / 2, bc, ov));
-      roofG.add(box(Lx + 2 * ov + bt, bh, bt, MAT.parapet, Lx / 2, bc, -(Ly + ov)));
-      roofG.add(box(bt, bh, Ly + 2 * ov + bt, MAT.parapet, -ov, bc, -Ly / 2));
-      roofG.add(box(bt, bh, Ly + 2 * ov + bt, MAT.parapet, Lx + ov, bc, -Ly / 2));
+      roofG.add(box(Lx + 2 * ov + bt, bh, bt, bandMat, Lx / 2, bc, ov));
+      roofG.add(box(Lx + 2 * ov + bt, bh, bt, bandMat, Lx / 2, bc, -(Ly + ov)));
+      roofG.add(box(bt, bh, Ly + 2 * ov + bt, bandMat, -ov, bc, -Ly / 2));
+      roofG.add(box(bt, bh, Ly + 2 * ov + bt, bandMat, Lx + ov, bc, -Ly / 2));
       // flat cap between the band and the slopes along the eaves so the box reads closed from above
       [[ov, 0], [Ly + ov, Ly]].forEach(([yo, yi]) => { const d = Math.abs(yo - yi); roofG.add(box(Lx + 2 * ov, 0.05, d, MAT.roof, Lx / 2, eave, -(yo + yi) / 2)); });
     } else {
@@ -171,14 +187,28 @@ export function buildDetailedBuilding(abk, footprint, opts = {}) {
       [0, Ly].forEach(y => roofG.add(box(Lx + 2 * ov, 0.25, 0.05, MAT.parapet, Lx / 2, eave - 0.1, -(y === 0 ? -ov : Ly + ov))));
     }
   }
+  // temple interior (АБК-2 hall): painted walls/ceiling, iconostasis, furniture
+  if (abk.temple) {
+    const T = Object.assign({wall_h: H}, abk.temple);
+    if (roof.type === 'gable') { const e = roof.eave, r = roof.ridge; T.topAt = y => e - 0.12 + (r - e) * (1 - Math.abs(y - Ly / 2) / (Ly / 2)); T.chord = roof.bottom_chord || H; T.truss_pitch = (roof.truss && roof.truss.pitch) || 3.1; T.trussMat = g.userData.trussMat; }
+    g.add(buildTemple(T));
+  }
+  // extras
+  (abk.extras || []).forEach(e => {
+    if (e.type === 'finial') { const gold = new THREE.MeshStandardMaterial({color: 0xd4a843, metalness: 0.8, roughness: 0.3}); const b = e.base_h, h = e.h;
+      const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.04, h, 12), gold); rod.position.copy(L(e.pos[0], e.pos[1], b + h / 2)); roofG.add(rod);
+      [0.3, 0.6].forEach((f, k) => { const s = new THREE.Mesh(new THREE.SphereGeometry(0.16 - k * 0.05, 16, 12), gold); s.position.copy(L(e.pos[0], e.pos[1], b + h * f)); roofG.add(s); });
+      const cres = new THREE.Mesh(new THREE.TorusGeometry(0.16, 0.03, 8, 24, Math.PI * 1.3), gold); cres.position.copy(L(e.pos[0], e.pos[1], b + h - 0.1)); cres.rotation.z = Math.PI * 0.35; roofG.add(cres); }
+  });
   // labels (room names) as small sprites
   if (opts.label && abk.labels) abk.labels.forEach(l => { const s = opts.label(l.s, [l.p[0], l.p[1]], 0x334455, 0.9, H + 0.3); s.position.copy(L(l.p[0], l.p[1], 0.9)); g.add(s); });
 
   // ---- placement on the site footprint: centre on the footprint, long axis along the footprint's long axis
-  if (footprint) {
-    const xs = footprint.map(p => p[0]), ys = footprint.map(p => p[1]);
+  if (footprint || (abk.placement && abk.placement.center)) {
+    const fp = footprint || [[abk.placement.center[0] - Lx / 2, abk.placement.center[1]], [abk.placement.center[0] + Lx / 2, abk.placement.center[1]]];
+    const xs = fp.map(p => p[0]), ys = fp.map(p => p[1]);
     const bx0 = Math.min(...xs), bx1 = Math.max(...xs), by0 = Math.min(...ys), by1 = Math.max(...ys);
-    const cx = (bx0 + bx1) / 2, cy = (by0 + by1) / 2;
+    const cx = abk.placement && abk.placement.center ? abk.placement.center[0] : (bx0 + bx1) / 2, cy = abk.placement && abk.placement.center ? abk.placement.center[1] : (by0 + by1) / 2;
     const rot = (abk.placement && abk.placement.rotation_deg !== undefined) ? abk.placement.rotation_deg : ((bx1 - bx0) >= (by1 - by0) ? 0 : 90);
     const wrap = new THREE.Group();
     g.position.set(-Lx / 2, 0, Ly / 2);          // centre the local model

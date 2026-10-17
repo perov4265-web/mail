@@ -20,7 +20,8 @@
     background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;backdrop-filter:blur(6px)}
   #panel h1{font-size:15px;margin:0 0 4px}
   #panel .sub{color:var(--muted);font-size:12px;margin-bottom:8px}
-  #panel label{display:flex;gap:8px;align-items:center;padding:3px 0;cursor:pointer}
+  #panel label{display:flex;gap:8px;align-items:center;padding:3px 0;cursor:pointer;flex-wrap:wrap}
+  #panel select{font:inherit;padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);max-width:100%}
   #panel hr{border:0;border-top:1px solid var(--line);margin:8px 0}
   #panel button{font:inherit;padding:5px 9px;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:6px;cursor:pointer;margin:2px 4px 2px 0}
   #panel button:hover{border-color:var(--accent)}
@@ -50,13 +51,20 @@
   <label><input type="checkbox" id="cbFence" checked> Ограждения и ворота</label>
   <label><input type="checkbox" id="cbPark" checked> Парковка: зоны A / B</label>
   <label><input type="checkbox" id="cbCarport" checked> Навесы (зона A)</label>
-  <label><input type="checkbox" id="cbGabion" checked> Габионы 1000×600</label>
+  <label><input type="checkbox" id="cbGabion" checked> Габионы 1,0 × 0,6 м</label>
   <label><input type="checkbox" id="cbSigns" checked> Дорожные знаки на стойках</label>
   <label><input type="checkbox" id="cbDetail" checked> АБК-1 и АБК-2 детально (стены, окна, мебель, фермы)</label>
   <label><input type="checkbox" id="cbRoof" checked> Кровли АБК (снять, чтобы видеть планировку)</label>
   <label><input type="checkbox" id="cbTruss" checked> Фермы и прогоны АБК-2</label>
+  <label>Храм, отделка колонн и ферм: <select id="selFinish">
+    <option value="white">1 — как есть: белая окраска</option>
+    <option value="wood">2 — дуб: короба колонн, подшивка поясов</option>
+    <option value="stucco">3 — каннелюры, позолота поясов</option>
+    <option value="icons">4 — колонны-киоты с иконами</option>
+    <option value="ceiling">5 — подшивной расписной потолок</option>
+  </select></label>
   <hr>
-  <button id="bTop">Вид сверху</button><button id="bIso">Общий вид</button><button id="bPark">К парковке</button><button id="bAbk1">К АБК-1</button><button id="bAbk2">К АБК-2</button>
+  <button id="bTop">Вид сверху</button><button id="bIso">Общий вид</button><button id="bPark">К парковке</button><button id="bAbk1">К АБК-1</button><button id="bAbk2">К АБК-2</button><button id="bMosque">К мечети</button><button id="bTemple">В храм</button>
   <hr>
   <div class="legend">
     <span class="sw" style="background:#d98f7a"></span><span>Здания (АБК, столовые, лаборатория)</span>
@@ -86,7 +94,7 @@ import { buildDetailedBuilding } from './js/building.js';
 
 const DATA_URL = 'data/site.json';
 const site = await (await fetch(DATA_URL)).json();
-const abks = (await Promise.all(['data/abk1.json', 'data/abk2.json'].map(u => fetch(u).then(r => r.ok ? r.json() : null).catch(() => null)))).filter(Boolean);
+const abks = (await Promise.all(['data/abk1.json', 'data/abk2.json', 'data/mosque.json'].map(u => fetch(u).then(r => r.ok ? r.json() : null).catch(() => null)))).filter(Boolean);
 const T = site.meta.texture;
 const W = T.x1 - T.x0, H = T.y1 - T.y0;
 const cx = W/2, cy = H/2;
@@ -176,12 +184,21 @@ function setVolumes(on){ site.buildings.forEach((b,i)=>{ const m = bldMeshes[i];
 
 // ---------- detailed buildings (АБК-1 from DWG, АБК-2 from PDFs) ----------
 const detailed = {};
-abks.forEach(abk => {
-  const fb = site.buildings.find(b => b.id === (abk.placement && abk.placement.building)); if(!fb) return;
-  const wrap = buildDetailedBuilding(abk, fb.footprint, {label});
-  wrap.traverse(o => { if(o.isMesh){ o.userData = wrap.userData; bldMeshes.push(o); } });
-  G('detail').add(wrap); detailed[fb.id] = wrap;
-});
+function buildOne(abk){
+  const fb = site.buildings.find(b => b.id === (abk.placement && abk.placement.building));
+  if(!fb && !(abk.placement && abk.placement.center)) return;
+  const key = fb ? fb.id : abk.id;
+  if(detailed[key]){ const old = detailed[key]; G('detail').remove(old); old.traverse(o => { const i = bldMeshes.indexOf(o); if(i >= 0) bldMeshes.splice(i, 1); }); }
+  const wrap = buildDetailedBuilding(abk, fb ? fb.footprint : null, {label});
+  wrap.traverse(o => { if(o.isMesh){ if(!o.userData || !o.userData.id) o.userData = wrap.userData; bldMeshes.push(o); } });
+  G('detail').add(wrap); detailed[key] = wrap;
+}
+abks.forEach(buildOne);
+const selFinish = document.getElementById('selFinish');
+const qsF = new URLSearchParams(location.search).get('finish'); if(qsF){ selFinish.value = qsF; }
+function applyFinish(){ const abk = abks.find(a => a.temple); if(!abk) return; abk.temple.finish = selFinish.value; buildOne(abk); setRoofs(document.getElementById('cbRoof').checked); setTrusses(document.getElementById('cbTruss').checked); }
+selFinish.addEventListener('change', applyFinish);
+if(qsF) applyFinish();
 function setDetail(on){ groups.detail.visible = on; site.buildings.forEach((b,i) => { if(detailed[b.id]) bldMeshes[i].visible = !on; }); }
 function setRoofs(on){ Object.values(detailed).forEach(w => w.traverse(o => { if(o.name === 'roof') o.visible = on; })); }
 function setTrusses(on){ Object.values(detailed).forEach(w => w.traverse(o => { if(o.name === 'trusses') o.visible = on; })); }
@@ -213,6 +230,14 @@ P.zones.forEach(z => { z.stalls.forEach(s => { const m = prism(s, 0.03, new THRE
   const c = centroid(z.stalls[Math.floor(z.stalls.length/3)]); G('labels').add(label(z.id==='P-A'?'A — навесы':'B — открытая', [c[0], c[1]+6], zoneCol[z.id], 2.2, 0.5)); });
 
 // ---------- carports ----------
+// profiled steel sheet (профнастил): ribs run down the slope, 0.2 m pitch
+function profiledSheet(){
+  const c = document.createElement('canvas'); c.width = 256; c.height = 64; const x = c.getContext('2d');
+  x.fillStyle = '#9aa0a6'; x.fillRect(0,0,256,64);
+  for(let i=0;i<256;i+=32){ x.fillStyle='#b9bec3'; x.fillRect(i,0,10,64); x.fillStyle='#777c82'; x.fillRect(i+10,0,6,64); x.fillStyle='#8d9298'; x.fillRect(i+16,0,10,64); x.fillStyle='#a9aeb3'; x.fillRect(i+26,0,6,64); }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1/1.6, 1); t.rotation = Math.PI/2; t.anisotropy = 8;
+  return new THREE.MeshStandardMaterial({map:t, metalness:0.5, roughness:0.5, side:THREE.DoubleSide});
+}
 site.carports.forEach(cp => {
   const g = new THREE.Group();
   const steel = new THREE.MeshStandardMaterial({color:0x3b3f44, metalness:0.6, roughness:0.5});
@@ -224,7 +249,7 @@ site.carports.forEach(cp => {
   const roofG = new THREE.ExtrudeGeometry(shapeOf(local), {depth:cp.roof_thickness_m, bevelEnabled:false});
   roofG.rotateX(-Math.PI/2);            // -> plane XZ, thickness up
   roofG.rotateX(slope);                 // tilt about the front edge: back (-z) side rises to hb
-  const roof = new THREE.Mesh(roofG, new THREE.MeshStandardMaterial({color:0x8d939b, metalness:0.4, roughness:0.6, side:THREE.DoubleSide}));
+  const roof = new THREE.Mesh(roofG, profiledSheet(cp.roof_height_back_m > cp.roof_height_front_m ? 1 : -1));
   roof.position.set(0, hf, -yF); roof.castShadow = roof.receiveShadow = true; g.add(roof);
   const col = (p, h) => { const m = new THREE.Mesh(new THREE.BoxGeometry(cp.column_size_m, h, cp.column_size_m), steel); m.position.set(p[0], h/2, -p[1]); m.castShadow=true; g.add(m); };
   cp.columns_front.forEach(p => col(p, hf)); cp.columns_back.forEach(p => col(p, hb));
@@ -315,16 +340,18 @@ bind('cbFence','fence'); bind('cbPark','park'); bind('cbCarport','carport'); bin
 function flyToBuilding(id, dist){ const b = site.buildings.find(x => x.id === id); if(!b) return; const c = centroid(b.footprint); flyTo(new THREE.Vector3(c[0]+dist, dist*0.6, -c[1]+dist), new THREE.Vector3(c[0], 1.5, -c[1])); }
 document.getElementById('bAbk1').onclick = () => flyToBuilding('1', 38);
 document.getElementById('bAbk2').onclick = () => flyToBuilding('2.1', 45);
+document.getElementById('bMosque').onclick = () => { const m = abks.find(a => a.id === 'MOSQUE'); if(!m) return; const c = m.placement.center; flyTo(new THREE.Vector3(c[0]+16, 9, -c[1]+14), new THREE.Vector3(c[0], 1, -c[1])); };
+document.getElementById('bTemple').onclick = () => { flyTo(new THREE.Vector3(119.2, 1.6, -266), new THREE.Vector3(123.5, 1.6, -258)); };
 document.getElementById('tbtn').onclick = () => document.getElementById('panel').classList.toggle('open');
 const notes = document.getElementById('notes');
-[site.meta.scale_note, site.meta.axes, 'Высоты зданий — предварительные, для режима «Объёмы».', site.carports[0].note, site.gabions[0].note + ` По ${site.gabions[0].count} шт. (${site.gabions[0].length_m} м) в каждом ряду.`,
+[site.meta.scale_note, site.meta.axes, 'Высоты зданий — предварительные, для режима «Объёмы».', site.carports[0].note, site.gabions[0].note + ` ${site.gabions[0].count} шт., ${site.gabions[0].length_m} м.`,
  `Зона A — ${site.parking.zones[0].stalls.length} мест (ближе к КПП 10.1), зона B — ${site.parking.zones[1].stalls.length} мест; граница смещается в site.json.`, site.signs.note].forEach(t => { const li = document.createElement('li'); li.textContent = t; notes.appendChild(li); });
 function flyTo(pos, target){ camera.position.copy(pos); controls.target.copy(target); controls.update(); }
 const qs = new URLSearchParams(location.search); if(qs.get('cam') && qs.get('at')){ const n = s => s.split(',').map(Number); setTimeout(() => flyTo(new THREE.Vector3(...n(qs.get('cam'))), new THREE.Vector3(...n(qs.get('at')))), 0); }
 document.getElementById('bTop').onclick = () => flyTo(new THREE.Vector3(cx, 560, -cy+0.01), new THREE.Vector3(cx,0,-cy));
 document.getElementById('bIso').onclick = () => flyTo(new THREE.Vector3(cx-190, 210, -cy+330), new THREE.Vector3(cx,0,-cy));
 document.getElementById('bPark').onclick = () => { const c = centroid(site.parking.lot); flyTo(new THREE.Vector3(c[0]+48, 22, -c[1]-40), new THREE.Vector3(c[0]-4, 1, -c[1])); };
-({top:'bTop', park:'bPark', abk1:'bAbk1', abk2:'bAbk2'}[new URLSearchParams(location.search).get('view')] ? document.getElementById({top:'bTop', park:'bPark', abk1:'bAbk1', abk2:'bAbk2'}[new URLSearchParams(location.search).get('view')]) : document.getElementById('bIso')).onclick();
+({top:'bTop', park:'bPark', abk1:'bAbk1', abk2:'bAbk2', mosque:'bMosque', temple:'bTemple'}[new URLSearchParams(location.search).get('view')] ? document.getElementById({top:'bTop', park:'bPark', abk1:'bAbk1', abk2:'bAbk2', mosque:'bMosque', temple:'bTemple'}[new URLSearchParams(location.search).get('view')]) : document.getElementById('bIso')).onclick();
 
 // click -> info
 const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(); const info = document.getElementById('info');
@@ -337,7 +364,7 @@ renderer.domElement.addEventListener('pointerup', e => {
   const u = hit.object.userData; let html = `<b>${u.id ? u.id+' — ' : ''}${u.name||''}</b>`;
   if(u.size_m) html += `<div class="m">Габариты ≈ ${u.size_m[0]} × ${u.size_m[1]} м, высота (предв.) ${u.height_m} м</div>`;
   if(u.stalls) html += `<div class="m">Мест: ${u.stalls.length}, ${u.covered?'под навесом':'открытая'}</div>`;
-  if(u.box_m) html += `<div class="m">Короб ${u.box_m[0]*1000}×${u.box_m[2]*1000}×${u.box_m[1]*1000} мм, ${u.count} шт., ${u.fill}</div>`;
+  if(u.box_m) html += `<div class="m">Короб ${u.box_m[0]*1000} мм, высота ${u.box_m[2]*1000} мм, ширина ${u.box_m[1]*1000} мм, ${u.count} шт., ${u.fill}</div>`;
   if(u.plates) html = `<b>Знак ${u.plates.join(' + ')}</b><div class="m">${u.names.join('; ')}. Положение: по ${u.placement}у на плане.</div>`;
   if(u.roof_height_front_m) html += `<div class="m">Высота ${u.roof_height_front_m}–${u.roof_height_back_m} м, стоек: ${u.columns_front.length+u.columns_back.length}</div>`;
   if(u.note) html += `<div class="m">${u.note}</div>`;

@@ -105,7 +105,7 @@ fences = {
 # ---- parking inside the fence, by КПП 10.1: two perpendicular rows on a one-way aisle ----
 PITCH=7.0857                      # 2.5 m
 NROW=dict(x0=364.8, n=23, y_aisle=227.8, y_out=212.5)    # north row: aisle edge south, outer kerb north
-SROW=dict(x0=334.0, n=26, y_aisle=250.0, y_out=265.3)    # south row: aisle edge north, outer kerb south
+SROW=dict(x0=364.8-4*7.0857, n=26, y_aisle=250.0, y_out=265.3)    # south row: marking shifted 0.87 m east so its stall lines coincide with the north row's
 def row_stalls(r): 
     out=[]
     for i in range(r['n']):
@@ -113,7 +113,7 @@ def row_stalls(r):
     return out
 def row_lines(r): return [poly([(r['x0']+PITCH*i,r['y_aisle']),(r['x0']+PITCH*i,r['y_out'])]) for i in range(r['n']+1)]
 SHIFT=6                              # carports moved 6 stalls towards АБК-1 (east)
-A_N=(SHIFT, SHIFT+11); A_S=(SHIFT, SHIFT+16)     # covered stalls (zone A) per row, [from, to)
+A_N=(SHIFT, SHIFT+11); A_S=(SHIFT+4, SHIFT+15)   # covered stalls per row, [from, to): the same x-span in both rows (south index = north index + 4)
 ns, ss = row_stalls(NROW), row_stalls(SROW)
 XN0=NROW['x0']+PITCH*A_N[0]; XN1=NROW['x0']+PITCH*A_N[1]; XS0=SROW['x0']+PITCH*A_S[0]; XS1=SROW['x0']+PITCH*A_S[1]
 # truck/guest parking outside the fence (north strip, 19 angled 45° stalls) — marking only
@@ -126,7 +126,7 @@ parking={
  'rows':[{'id':'N','stalls':NROW['n'],'depth_m':round((NROW['y_aisle']-NROW['y_out'])*S,2)},{'id':'S','stalls':SROW['n'],'depth_m':round((SROW['y_out']-SROW['y_aisle'])*S,2)}],
  'aisle_width_m':round((SROW['y_aisle']-NROW['y_aisle'])*S,2),
  'zones':[
-  {'id':'P-A','name':'Зона A — навесы с двух сторон проезда (сдвинуты на 6 мест к АБК-1)','stalls':ns[A_N[0]:A_N[1]]+ss[A_S[0]:A_S[1]],'covered':True},
+  {'id':'P-A','name':'Зона A — навесы с двух сторон проезда, симметрично, 11+11 мест (сдвинуты на 6 мест к АБК-1)','stalls':ns[A_N[0]:A_N[1]]+ss[A_S[0]:A_S[1]],'covered':True},
   {'id':'P-B','name':'Зона B — открытая, отделена габионами','stalls':ns[:A_N[0]]+ns[A_N[1]:]+ss[:A_S[0]]+ss[A_S[1]:],'covered':False},
  ],
  'truck_parking':{'name':'Стоянка за ограждением (косые места)','stall_lines':truck_lines}}
@@ -141,21 +141,21 @@ carports=[
   'roof':poly([(XN0,NROW['y_aisle']+1.0),(XN0,NROW['y_out']-1.0),(XN1,NROW['y_out']-1.0),(XN1,NROW['y_aisle']+1.0)]),
   'roof_height_front_m':4.0,'roof_height_back_m':2.0,'roof_thickness_m':0.12,'column_size_m':0.15,
   'columns_front':cols(NROW,XN0,XN1,NROW['y_aisle']),'columns_back':cols(NROW,XN0,XN1,NROW['y_out']),
-  'note':'Односкатный стальной навес: 4 м у проезда, 2 м по дальнему краю; стойки через 2 места (5 м) по линиям разметки'},
+  'note':'Односкатный стальной навес, кровля — профнастил: 4 м у проезда, 2 м по дальнему краю; стойки через 2 места (5 м) по линиям разметки'},
  {'id':'CP-S','name':'Навес, южный ряд (зона A, места %d–%d)'%(A_S[0]+1,A_S[1]),
   'roof':poly([(XS0,SROW['y_out']+1.0),(XS0,SROW['y_aisle']-1.0),(XS1,SROW['y_aisle']-1.0),(XS1,SROW['y_out']+1.0)]),
   'roof_height_front_m':2.0,'roof_height_back_m':4.0,'roof_thickness_m':0.12,'column_size_m':0.15,
   'columns_front':cols(SROW,XS0,XS1,SROW['y_out']),'columns_back':cols(SROW,XS0,XS1,SROW['y_aisle']),
-  'note':'Односкатный стальной навес: 4 м у проезда, 2 м по дальнему краю; стойки через 2 места (5 м) по линиям разметки'},
+  'note':'Односкатный стальной навес, кровля — профнастил: 4 м у проезда, 2 м по дальнему краю; стойки через 2 места (5 м) по линиям разметки'},
 ]
-# gabion walls on both ends of the covered zone in each row (across the stall, aisle stays open)
+# gabion wall: one continuous wall across the whole lot (north sidewalk -> stalls -> aisle -> stalls -> south sidewalk)
+# on the boundary between the covered zone A and the open zone B (east end of the carports)
 gabions=[]
-for gid,x,r,side in [('GB-N-W',XN0,NROW,'западный'),('GB-N-E',XN1,NROW,'восточный'),('GB-S-W',XS0,SROW,'западный'),('GB-S-E',XS1,SROW,'восточный')]:
-    a=M((x,r['y_out'])); b=M((x,r['y_aisle'])); L=math.dist(a,b)
-    gabions.append({'id':gid,'name':'Габионная стенка, %s торец навеса (%s ряд)'%(side,'северный' if 'N' in gid else 'южный'),
-      'line':[a,b],'box_m':[1.0,0.3,0.6],'tiers':1,'count':int(round(L/1.0)),'length_m':round(L,2),
-      'fill':'средний камень 70–150 мм, сетка сварная оцинкованная',
-      'note':'Коробы 1000×600 (длина×высота), толщина 300 мм принята; по линии разметки на границе зон, проезд не перекрывается'})
+a_=M((XN1,NROW['y_out'])); b_=M((XN1,SROW['y_out'])); L=math.dist(a_,b_)
+gabions.append({'id':'GB-1','name':'Габионная стенка между зонами A и B, через проезд от тротуара до тротуара',
+  'line':[a_,b_],'box_m':[1.0,0.6,1.0],'tiers':1,'count':int(round(L/1.0)),'length_m':round(L,2),
+  'fill':'средний камень 70–150 мм, сетка сварная оцинкованная',
+  'note':'Короба 1000 мм, высота 1,0 м, ширина 0,6 м; сплошная стенка по линии разметки от северного тротуара до южного, перекрывает проезд'})
 site={
  'meta':{'title':'Жилой городок АО «НЭПТ» — схема генплана','source':'Civil 3D PDF (лист A2), векторная выгрузка',
    'units':'m','scale_m_per_pt':round(S,5),'scale_note':'масштаб листа 1:1000 (1 pt = 0,3528 м); проверено по шагу мест 2,5 м, глубине места 5,4 м и ширине проезда 7,8 м',
