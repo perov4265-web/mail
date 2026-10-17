@@ -14,7 +14,7 @@ const VIEWS = {
   temple_nave: 'finish=wood&' + FRONT, temple_trusses: 'cam=124.5,1.6,-266&at=114,2.9,-254',
   temple_stasidia: 'cam=121,1.6,-258&at=113,1.6,-262',
 };
-for (const f of ['white', 'wood', 'wood_open', 'wood_glass', 'stucco', 'icons', 'ceiling']) VIEWS['temple_finish_' + f] = 'finish=' + f + '&' + FRONT;
+for (const f of ['white', 'wood', 'wood_open', 'wood_glass', 'stucco', 'icons', 'icons_painted', 'ceiling']) VIEWS['temple_finish_' + f] = 'finish=' + f + '&' + FRONT;
 (async () => {
   const names = process.argv.slice(2).length ? process.argv.slice(2) : Object.keys(VIEWS);
   const b = await chromium.launch({ executablePath: process.env.CHROME || undefined, args: ['--no-sandbox', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });

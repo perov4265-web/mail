@@ -198,5 +198,15 @@
   "cost": 20,
   "runtime": 15.95,
   "saved": true
+ },
+ "temple_finish_icons_painted": {
+  "request_id": 55901760,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792234456_6ad353d8be0d2.jpg",
+  "cost": 20,
+  "runtime": 14.89,
+  "saved": true
  }
 }

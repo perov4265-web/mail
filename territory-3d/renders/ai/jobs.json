@@ -98,5 +98,10 @@
   "name": "mosque_hall",
   "ref": "renders/mosque_hall.jpg",
   "prompt": "Interior of a small prayer room in a modular building, eye-level corner view: a luxurious deep green wool carpet with a gold border and rows of arched prayer niches covering the whole floor, light grey sandwich-panel walls with slim dark joints, a small window with daylight, a pale fabric curtain divider on the right, low flat ceiling, calm soft light. Photorealistic architectural interior visualization, 24 mm lens, high detail, no people, no text, no watermark."
+ },
+ {
+  "name": "temple_finish_icons_painted",
+  "ref": "renders/temple_finish_icons_painted.jpg",
+  "prompt": "Interior of an Orthodox chapel fitted inside a modular hall, seen from the hall in front of the iconostasis: iconostasis along the far wall with gilded icons, red-and-gold lattice royal doors with a gilded cross above, red curtains, a low wooden solea with a red carpet runner with gold border, brass candle stands and a wooden lectern in the foreground, painted walls with pastel arches, painted ceiling with leaf ornament and medallions, warm interior light. Columns shaped as tall oak icon cases (kiots) with gilded frames and painted icons on each face. The roof trusses are fully boxed in oak casings; each casing carries painted biblical scenes in Byzantine icon style (haloed figures on gold and ochre landscapes) and, below them, a continuous band covered in real gold leaf with embossed scripture verses in Greek, Hebrew and Old Church Slavonic lettering, the letters dark on burnished gold; gilded mouldings along the chords. Keep the text bands legible as calligraphic lettering. Photorealistic architectural interior visualization, 24 mm lens, high detail, no people, no watermark."
  }
 ]

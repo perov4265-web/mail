@@ -76,6 +76,29 @@ function iconTexture(i) {
     x.fillStyle = '#8a1e1e'; x.font = 'bold 22px serif'; x.textAlign = 'center'; x.fillText(i % 2 ? 'IC XC' : 'ΜΡ ΘΥ', w / 2, 60);
   });
 }
+const VERSES = [
+  ['Ἐν ἀρχῇ ἦν ὁ Λόγος, καὶ ὁ Λόγος ἦν πρὸς τὸν Θεόν', 'Ин. 1:1'], ['בְּרֵאשִׁית בָּרָא אֱלֹהִים אֵת הַשָּׁמַיִם וְאֵת הָאָרֶץ', 'Быт. 1:1'],
+  ['Въ нача́лѣ бѣ̀ сло́во, и҆ сло́во бѣ̀ къ бг҃ꙋ', 'Ин. 1:1'], ['Ἐγώ εἰμι ἡ ὁδὸς καὶ ἡ ἀλήθεια καὶ ἡ ζωή', 'Ин. 14:6'],
+  ['שְׁמַע יִשְׂרָאֵל יְהוָה אֱלֹהֵינוּ יְהוָה אֶחָד', 'Втор. 6:4'], ['А҆́зъ є҆́смь свѣ́тъ мі́рꙋ', 'Ин. 8:12'],
+  ['Μακάριοι οἱ καθαροὶ τῇ καρδίᾳ, ὅτι αὐτοὶ τὸν Θεὸν ὄψονται', 'Мф. 5:8'], ['יְהוָה רֹעִי לֹא אֶחְסָר', 'Пс. 22:1'],
+  ['Бг҃ъ любы̀ є҆́сть', '1 Ин. 4:16'], ['Χριστὸς ἀνέστη ἐκ νεκρῶν, θανάτῳ θάνατον πατήσας', 'тропарь'],
+];
+function sceneTexture(i) {   // painted biblical scene on a truss casing: landscape, haloed figures, gilded verse band below
+  const robes = ['#8b1e2d', '#2f4f7f', '#5a3d2b', '#3f6b4f', '#7a2d6b', '#b8742a'];
+  return tex(1024, 320, (x, w, h) => {
+    const sky = x.createLinearGradient(0, 0, 0, h * 0.7); sky.addColorStop(0, '#c9b36a'); sky.addColorStop(1, '#efe3bd'); x.fillStyle = sky; x.fillRect(0, 0, w, h);
+    x.fillStyle = '#9fae7a'; x.beginPath(); x.moveTo(0, h * 0.62); for (let k = 0; k <= 8; k++) x.lineTo(w * k / 8, h * (0.5 + 0.12 * Math.sin(k * 1.7 + i))); x.lineTo(w, h * 0.72); x.lineTo(0, h * 0.72); x.closePath(); x.fill();
+    x.fillStyle = '#b89a6a'; x.fillRect(0, h * 0.7, w, h * 0.1);
+    const n = 3 + (i % 3); for (let k = 0; k < n; k++) { const cx = w * (k + 1) / (n + 1), base = h * 0.76, fh = h * 0.5;
+      x.fillStyle = '#f0d88a'; x.beginPath(); x.arc(cx, base - fh + 22, 26, 0, 7); x.fill(); x.strokeStyle = '#b08a3a'; x.lineWidth = 3; x.stroke();
+      x.fillStyle = robes[(i + k) % robes.length]; x.beginPath(); x.moveTo(cx - 22, base); x.lineTo(cx - 16, base - fh + 50); x.quadraticCurveTo(cx, base - fh + 30, cx + 16, base - fh + 50); x.lineTo(cx + 22, base); x.closePath(); x.fill();
+      x.fillStyle = '#e8c9a8'; x.beginPath(); x.arc(cx, base - fh + 22, 15, 0, 7); x.fill(); }
+    const band = x.createLinearGradient(0, h * 0.8, 0, h); band.addColorStop(0, '#e6c86a'); band.addColorStop(0.5, '#f6e2a0'); band.addColorStop(1, '#c9a24a'); x.fillStyle = band; x.fillRect(0, h * 0.8, w, h * 0.2);
+    x.strokeStyle = '#8a6a2a'; x.lineWidth = 3; x.strokeRect(6, 6, w - 12, h - 12); x.beginPath(); x.moveTo(6, h * 0.8); x.lineTo(w - 6, h * 0.8); x.stroke();
+    const [t, ref] = VERSES[i % VERSES.length]; x.fillStyle = '#5a3a0a'; x.textAlign = 'center'; x.textBaseline = 'middle';
+    x.font = 'bold 34px "FreeSerif", "Times New Roman", serif'; x.fillText(t, w / 2, h * 0.9); x.font = '18px serif'; x.fillStyle = '#7a5a1a'; x.textAlign = 'right'; x.fillText(ref, w - 16, h * 0.86);
+  });
+}
 function stainedGlassTexture() { // leaded glass: coloured cells with dark leading, warm palette
   return tex(512, 256, (x, w, h) => {
     const cols = ['#c8403a', '#2c6fb3', '#e0b43a', '#3d8a4f', '#8b3f9c', '#e07a2e', '#4bb0c9'];
@@ -198,7 +221,7 @@ export function buildTemple(T) {
       m.rotation.x = Math.PI / 2 + Math.atan2(zb - za, yb - ya); ceil.add(m);
     });
   }
-  // columns and trusses: finish variants (T.finish): white | wood | stucco | icons | ceiling
+  // columns and trusses: finish variants (T.finish): white | wood | wood_open | wood_glass | stucco | icons | icons_painted | ceiling
   const F = T.finish || 'white'; const chord = T.chord || H;
   const colH = y => (T.topAt ? T.topAt(y - y0) : H) + 0.1;
   const fluted = new THREE.MeshLambertMaterial({map: tex(256, 64, (x, w, h) => { x.fillStyle = '#efe9dc'; x.fillRect(0, 0, w, h); for (let i = 0; i < w; i += 32) { x.fillStyle = '#d8d0bf'; x.fillRect(i, 0, 8, h); x.fillStyle = '#f8f5ee'; x.fillRect(i + 8, 0, 6, h); } }, [6, 1])});
@@ -207,7 +230,7 @@ export function buildTemple(T) {
     const h = colH(y);
     if (F === 'wood' || F === 'wood_open' || F === 'wood_glass') {            // oak casing with plinth and capital
       g.add(box(0.32, h, 0.32, WOOD2, x, h / 2, -y)); g.add(box(0.46, 0.3, 0.46, WOOD, x, 0.15, -y)); g.add(box(0.46, 0.18, 0.46, WOOD, x, h - 0.09, -y)); g.add(box(0.4, 0.04, 0.4, GOLD, x, h - 0.2, -y));
-    } else if (F === 'icons') {    // oak casing carrying icons on four sides, gilded cornice
+    } else if (F === 'icons' || F === 'icons_painted') {    // oak casing carrying icons on four sides, gilded cornice
       g.add(box(0.36, h, 0.36, WOOD2, x, h / 2, -y)); g.add(box(0.5, 0.25, 0.5, WOOD, x, 0.125, -y)); g.add(box(0.5, 0.12, 0.5, GOLD, x, 2.55, -y));
       [[0, 0.185, 0], [0, -0.185, Math.PI], [0.185, 0, Math.PI / 2], [-0.185, 0, -Math.PI / 2]].forEach(([dx, dz, ry], k) => { const ic = new THREE.Mesh(new THREE.PlaneGeometry(0.26, 0.5), new THREE.MeshLambertMaterial({map: iconTexture(k + 5)})); ic.position.set(x + dx, 1.9, -y - dz); ic.rotation.y = ry; g.add(ic); });
     } else if (F === 'stucco' || F === 'ceiling') {   // fluted plaster column, marble base, gilded capital
@@ -220,7 +243,7 @@ export function buildTemple(T) {
   });
   // trusses: positions along the hall at the truss pitch (building grid), bottom chord at `chord`
   const trussX = []; if (T.truss_pitch) { for (let x = 0; x <= x1 + 0.01; x += T.truss_pitch) if (x >= x0 - 0.05 && x <= x1 + 0.05) trussX.push(x); }
-  if (T.trussMat) T.trussMat.color.set(F === 'stucco' ? '#e8dcc0' : (F === 'wood' || F === 'wood_open' || F === 'wood_glass') ? '#eee8dc' : '#f2f1ec');
+  if (T.trussMat) T.trussMat.color.set(F === 'stucco' ? '#e8dcc0' : (F === 'wood' || F === 'wood_open' || F === 'wood_glass' || F === 'icons_painted') ? '#eee8dc' : '#f2f1ec');
   if (F === 'wood_open' || F === 'wood_glass') {   // cladding follows the members exactly (same geometry as the steel truss): oak boxes around chords, verticals and diagonals
     const topY = y => (T.topAt ? T.topAt(y - y0) : chord + 0.3);           // = top chord axis of the building truss
     const L = (x, y, h) => new THREE.Vector3(x, h, -y);
@@ -239,27 +262,28 @@ export function buildTemple(T) {
           } } }
     });
   }
-  if (F === 'wood' || F === 'stucco') {   // full truss casing: a solid profile from the bottom chord up to the roof, 0.3 m thick, gilded moulding along the bottom edge
+  if (F === 'wood' || F === 'stucco' || F === 'icons_painted') {   // full truss casing: a solid profile from the bottom chord up to the roof, 0.3 m thick, gilded moulding along the bottom edge
     const topY = y => (T.topAt ? T.topAt(y - y0) : chord + 0.3) - 0.02;
     trussX.forEach(x => {
       const sh = new THREE.Shape(); sh.moveTo(y0, chord - 0.12); sh.lineTo(y1, chord - 0.12); sh.lineTo(y1, topY(y1));
       for (let k = 10; k >= 0; k--) { const y = y0 + (y1 - y0) * k / 10; sh.lineTo(y, topY(y)); } sh.closePath();
       const geo = new THREE.ExtrudeGeometry(sh, {depth: 0.3, bevelEnabled: false}); geo.rotateY(Math.PI / 2);   // shape (y->X, z->Y) extruded along -Z... -> after rotation: extrude along +X, shape y along -Z
-      const m = new THREE.Mesh(geo, F === 'wood' ? WOOD2 : new THREE.MeshLambertMaterial({color: 0xe8dcc0})); m.position.set(x - 0.15, 0, 0); m.castShadow = true; g.add(m);
+      const m = new THREE.Mesh(geo, F !== 'stucco' ? WOOD2 : new THREE.MeshLambertMaterial({color: 0xe8dcc0})); m.position.set(x - 0.15, 0, 0); m.castShadow = true; g.add(m);
       g.add(box(0.36, 0.06, Ly, GOLD, x, chord - 0.13, -(y0 + Ly / 2)));
-      g.add(box(0.34, 0.1, Ly, F === 'wood' ? WOOD : new THREE.MeshLambertMaterial({color: 0xd8ccae}), x, chord - 0.05, -(y0 + Ly / 2)));
+      g.add(box(0.34, 0.1, Ly, F !== 'stucco' ? WOOD : new THREE.MeshLambertMaterial({color: 0xd8ccae}), x, chord - 0.05, -(y0 + Ly / 2)));
       // carved panels: on both faces, one recessed panel per bay between column lines, framed by gilded strips
       const lines = [y0, ...(T.columns || []).map(c => c[1]).filter((v, i, a) => a.indexOf(v) === i).sort((p, q) => p - q), y1];
       const panelMat = F === 'wood' ? WOOD : new THREE.MeshLambertMaterial({color: 0xf0e6cf});
       for (let i = 0; i < lines.length - 1; i++) {
+        const painted = F === 'icons_painted' ? new THREE.MeshBasicMaterial({map: sceneTexture(trussX.indexOf(x) * 3 + i)}) : null;   // painted scene with gilded verse band
         const a = lines[i] + 0.25, b = lines[i + 1] - 0.25; if (b - a < 0.8) continue;
         const ya = a, yb = b, hA = topY(a) - chord, hB = topY(b) - chord; const hMin = Math.min(hA, hB) - 0.14;
         if (hMin < 0.25) continue;
         [x - 0.16, x + 0.16].forEach(fx => {
-          g.add(box(0.02, hMin, b - a, panelMat, fx, chord + 0.07 + hMin / 2, -(a + b) / 2));           // lighter field
+          g.add(box(0.02, hMin, b - a, painted || panelMat, fx, chord + 0.07 + hMin / 2, -(a + b) / 2));           // lighter field / painted scene
           g.add(box(0.03, 0.04, b - a, GOLD, fx, chord + 0.07, -(a + b) / 2)); g.add(box(0.03, 0.04, b - a, GOLD, fx, chord + 0.07 + hMin, -(a + b) / 2));
           g.add(box(0.03, hMin, 0.04, GOLD, fx, chord + 0.07 + hMin / 2, -a)); g.add(box(0.03, hMin, 0.04, GOLD, fx, chord + 0.07 + hMin / 2, -b));
-          const ros = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.03, 16), GOLD); ros.rotation.z = Math.PI / 2; ros.position.set(fx, chord + 0.07 + hMin / 2, -(a + b) / 2); g.add(ros);
+          if (!painted) { const ros = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.03, 16), GOLD); ros.rotation.z = Math.PI / 2; ros.position.set(fx, chord + 0.07 + hMin / 2, -(a + b) / 2); g.add(ros); }
         });
       }
     });

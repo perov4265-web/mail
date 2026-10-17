@@ -27,5 +27,5 @@ industrial camp, overcast soft daylight, 35 mm lens, high detail, no people, no 
 
 | Файл | Камера | Что меняется |
 |---|---|---|
-| `temple_finish_white.jpg` … `temple_finish_ceiling.jpg` | та же, что `temple_nave.jpg` (`?finish=white\|wood\|wood_open\|wood_glass\|stucco\|icons\|ceiling`) | отделка колонн и ферм: белая сталь, дуб сплошной с филёнками, дуб по элементам, дуб с витражами, каннелюры с позолотой, колонны-киоты, подшивной расписной потолок |
+| `temple_finish_white.jpg` … `temple_finish_ceiling.jpg` | та же, что `temple_nave.jpg` (`?finish=white\|wood\|wood_open\|wood_glass\|stucco\|icons\|icons_painted\|ceiling`) | отделка колонн и ферм: белая сталь, дуб сплошной с филёнками, дуб по элементам, дуб с витражами, каннелюры с позолотой, колонны-киоты, колонны-киоты с обшитыми фермами (библейские сюжеты, золочёные ленты с текстами на греческом, иврите и церковнославянском), подшивной расписной потолок |
 | `mosque_hall.jpg` | (30.9, 1.6, −116) → (26.7, 0.7, −121.3) | молитвенный зал с уровня глаз: ковёр, окно, штора-разделитель справа |
