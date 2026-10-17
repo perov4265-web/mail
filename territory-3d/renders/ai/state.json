@@ -429,7 +429,7 @@
   "runtime": 15.72,
   "saved": true
  },
- "mosque_ne": {
+ "mosque_ne__v3": {
   "request_id": 55906856,
   "status": "success",
   "model": "nano-banana-2",
@@ -437,6 +437,16 @@
   "url": "https://gen-api.storage.yandexcloud.net/input_files/1792240697_6ad36c399fc5a.jpg",
   "cost": 20,
   "runtime": 15.77,
+  "saved": true
+ },
+ "mosque_ne": {
+  "request_id": 55906939,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792240772_6ad36c848bf9b.jpg",
+  "cost": 20,
+  "runtime": 17.71,
   "saved": true
  }
 }
