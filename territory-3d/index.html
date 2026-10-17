@@ -71,7 +71,7 @@
     <option value="ceiling">5 — подшивной расписной потолок</option>
   </select></label>
   <hr>
-  <button id="bTop">Вид сверху</button><button id="bIso">Общий вид</button><button id="bPark">К парковке</button><button id="bAbk1">К АБК-1</button><button id="bAbk2">К АБК-2</button><button id="bMosque">К мечети</button><button id="bTemple">Зайти в храм</button><button id="bExit" hidden>Выйти из прогулки</button>
+  <button id="bTop">Вид сверху</button><button id="bIso">Общий вид</button><button id="bPark">К парковке</button><button id="bAbk1">К АБК-1</button><button id="bAbk2">К АБК-2</button><button id="bMosque">К мечети</button><button id="bTemple">Зайти в храм</button><button id="bWalk">Прогулка по территории</button><button id="bExit" hidden>Выйти из прогулки</button>
   <hr>
   <div class="legend">
     <span class="sw" style="background:#d98f7a"></span><span>Здания (АБК, столовые, лаборатория)</span>
@@ -88,7 +88,7 @@
 </div>
 <div id="info"></div>
 <div id="walk" hidden>
-  <div class="hint">Прогулка: W A S D или стрелки — идти, мышь (зажать) — смотреть, Q/E — повернуться, Esc — выйти</div>
+  <div class="hint">Прогулка: W A S D или стрелки — идти, Shift — бегом, мышь (зажать) — смотреть, Q/E — повернуться, Esc — выйти</div>
   <div class="pad"><button data-k="f">▲</button><div><button data-k="l">◀</button><button data-k="b">▼</button><button data-k="r">▶</button></div></div>
 </div>
 
@@ -356,17 +356,28 @@ document.getElementById('bMosque').onclick = () => { const m = abks.find(a => a.
 const walk = {on:false, yaw:0, pitch:0, keys:{}, box:null, drag:null};
 const walkUI = document.getElementById('walk'), bExit = document.getElementById('bExit');
 function templeBox(){ const w = Object.values(detailed).find(x => x.userData.templeWorld); return w ? w.userData.templeWorld : null; }
-function startWalk(){
-  const b = templeBox(); if(!b) return; walk.box = b; walk.on = true; controls.enabled = false;
-  // start at the middle of the nave looking along the hall
-  camera.position.set(b.start.x, 1.6, b.start.z); walk.yaw = Math.atan2(b.lookAt.x - b.start.x, -(b.lookAt.z - b.start.z)); walk.pitch = 0;
+function beginWalk(b, start, lookAt, eye){
+  walk.box = b; walk.on = true; controls.enabled = false; walk.eye = eye;
+  camera.position.set(start.x, eye, start.z); walk.yaw = Math.atan2(lookAt.x - start.x, -(lookAt.z - start.z)); walk.pitch = 0;
   walkUI.hidden = false; bExit.hidden = false; document.getElementById('info').style.display = 'none';
   walk.labels = groups.labels.visible; groups.labels.visible = false;
   groups.detail.traverse(o => { if(o.isSprite) o.visible = false; });
-  setRoofs(true); // the painted ceiling needs the roof group
 }
-function stopWalk(){ walk.on = false; walkUI.hidden = true; bExit.hidden = true; controls.enabled = true; groups.labels.visible = walk.labels !== false; groups.detail.traverse(o => { if(o.isSprite) o.visible = true; }); document.getElementById('bAbk2').onclick(); }
-document.getElementById('bTemple').onclick = startWalk; bExit.onclick = stopWalk;
+// inside the temple: start at the middle of the nave looking along the hall, slow pace, painted ceiling needs the roof group
+function startWalk(){ const b = templeBox(); if(!b) return; setRoofs(true); beginWalk(Object.assign({speed:2.2}, b), b.start, b.lookAt, 1.6); }
+// whole site: start on the ground under the current view point, looking the way the camera looks, brisk pace (Shift — run)
+function startSiteWalk(){
+  const t = controls.target.clone(), d = t.clone().sub(camera.position).setY(0); if(d.lengthSq() < 1e-6) d.set(0, 0, -1); d.normalize();
+  const start = new THREE.Vector3(Math.max(1, Math.min(W-1, t.x)), 0, Math.max(-H+1, Math.min(-1, t.z)));
+  beginWalk({xmin:0, xmax:W, zmin:-H, zmax:0, speed:4, run:10}, start, start.clone().add(d), 1.7);
+}
+function stopWalk(){
+  walk.on = false; walkUI.hidden = true; bExit.hidden = true; controls.enabled = true; groups.labels.visible = walk.labels !== false; groups.detail.traverse(o => { if(o.isSprite) o.visible = true; });
+  // step back and up from where we stood, keeping the direction of view
+  const fwd = new THREE.Vector3(Math.sin(walk.yaw), 0, -Math.cos(walk.yaw)), p = camera.position.clone().setY(0);
+  flyTo(p.clone().addScaledVector(fwd, -12).setY(walk.box && walk.box.h ? 1.6 : 10), p.clone().addScaledVector(fwd, 15).setY(walk.box && walk.box.h ? 1.6 : 0));
+}
+document.getElementById('bTemple').onclick = startWalk; document.getElementById('bWalk').onclick = startSiteWalk; bExit.onclick = stopWalk;
 addEventListener('keydown', e => { if(!walk.on) return; if(e.key === 'Escape') return stopWalk(); walk.keys[e.key.toLowerCase()] = true; if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(e.key.toLowerCase())) e.preventDefault(); });
 addEventListener('keyup', e => { walk.keys[e.key.toLowerCase()] = false; });
 renderer.domElement.addEventListener('pointerdown', e => { if(walk.on){ walk.drag = {x:e.clientX, y:e.clientY, yaw:walk.yaw, pitch:walk.pitch}; } });
@@ -376,13 +387,13 @@ walkUI.querySelectorAll('.pad button').forEach(b => { const k = {f:'w', b:'s', l
 let lastT = performance.now();
 function walkStep(){
   const now = performance.now(), dt = Math.min(0.05, (now - lastT) / 1000); lastT = now; if(!walk.on) return;
-  const k = walk.keys, sp = 2.2 * dt, rot = 1.6 * dt;
+  const k = walk.keys, sp = ((k['shift'] && walk.box.run) || walk.box.speed || 2.2) * dt, rot = 1.6 * dt;
   if(k['q'] || k['arrowleft']) walk.yaw -= rot; if(k['e'] || k['arrowright']) walk.yaw += rot;
   const fwd = new THREE.Vector3(Math.sin(walk.yaw), 0, -Math.cos(walk.yaw)), right = new THREE.Vector3(fwd.z, 0, -fwd.x).negate();
   const p = camera.position.clone();
   if(k['w'] || k['arrowup']) p.addScaledVector(fwd, sp); if(k['s'] || k['arrowdown']) p.addScaledVector(fwd, -sp);
   if(k['a']) p.addScaledVector(right, -sp); if(k['d']) p.addScaledVector(right, sp);
-  const b = walk.box; p.x = Math.max(b.xmin+0.5, Math.min(b.xmax-0.5, p.x)); p.z = Math.max(b.zmin+0.5, Math.min(b.zmax-0.5, p.z)); p.y = 1.6;
+  const b = walk.box; p.x = Math.max(b.xmin+0.5, Math.min(b.xmax-0.5, p.x)); p.z = Math.max(b.zmin+0.5, Math.min(b.zmax-0.5, p.z)); p.y = walk.eye || 1.6;
   camera.position.copy(p);
   const look = p.clone().add(new THREE.Vector3(Math.sin(walk.yaw)*Math.cos(walk.pitch), -Math.sin(walk.pitch), -Math.cos(walk.yaw)*Math.cos(walk.pitch)));
   camera.lookAt(look);

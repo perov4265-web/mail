@@ -1,7 +1,10 @@
 # Ракурсы и промты для фотореалистичного рендеринга
 
-Каждый ракурс — скриншот из 3D-модели (`renders/*.jpg`, без интерфейса) и промт.
-Скриншот подаётся как референс (image-to-image, сила 0,55–0,7), промт — текстом.
+Каждый ракурс — скриншот из 3D-модели (`renders/*.jpg`) и промт. Скриншоты снимает
+`tools/renders/make_refs.js`: без подписей, стрелок движения, сетки и линий бордюров, с объёмами
+зданий для наружных видов, текстура плана очищена от пурпурных линий (`tools/renders/clean_plan.py`).
+Рендер — `tools/genapi_render.py` (gen-api.ru, Nano Banana 2, image-to-image), задачи и промты в
+`renders/ai/jobs.json`, результаты в `renders/ai/`.
 Общий хвост для всех промтов: *photorealistic architectural visualization, Kazakhstan steppe
 industrial camp, overcast soft daylight, 35 mm lens, high detail, no people, no text, no watermark*.
 
@@ -16,6 +19,13 @@ industrial camp, overcast soft daylight, 35 mm lens, high detail, no people, no 
 | `mosque_entrance.jpg` | (34, 1.8, −131) → (33, 1.5, −120) | Eye-level view of the north entrance: a small grey vestibule box attached to the module, wooden entrance door, short ramp, light grey panel walls, dark roof band, gilded spire, camp fence and road behind. |
 | `mosque_aerial.jpg` | (22, 24, −100) → (32, 0, −118.6) | Aerial view of the mosque module next to a fenced waste-container pad: gable roof of dark profiled sheet with a gilded finial, canopy on posts towards the pad, vestibule on the north, grey paving, kerbs, mesh fence, road with markings. |
 | `mosque_interior.jpg` | крыша снята, (38, 2.6, −123.5) → (29, 1.0, −117) | Interior of the prayer hall seen from above with the roof removed: one large deep green wool carpet with a gold border and rows of arched prayer niches covering the whole floor, light grey panel walls, a pale curtain divider across the room, a small shoe rack by the door, soft daylight from one window. |
-| `temple_nave.jpg` | кнопка «Зайти в храм» | Interior of an Orthodox chapel fitted inside a modular hall: iconostasis along the long wall with gilded icons, red-and-gold lattice royal doors, red curtains, a red carpet runner with gold border on a low wooden solea, brass candle stands, wooden lecterns, painted walls with pastel arches and leaf ornament, oak-clad square columns with gilded capitals, oak-clad roof trusses with stained-glass panels in the openings glowing warm, painted ceiling. |
+| `temple_nave.jpg` | из зала напротив иконостаса: (113.3, 1.6, −258.6) → (120.4, 1.8, −258.6) | Interior of an Orthodox chapel fitted inside a modular hall: iconostasis along the long wall with gilded icons, red-and-gold lattice royal doors, red curtains, a red carpet runner with gold border on a low wooden solea, brass candle stands, wooden lecterns, painted walls with pastel arches and leaf ornament, oak-clad square columns with gilded capitals, oak-clad roof trusses with stained-glass panels in the openings glowing warm, painted ceiling. |
 | `temple_trusses.jpg` | (124.5, 1.6, −266) → (114, 2.9, −254) | Looking up along the chapel hall at the oak-clad roof trusses: every chord, vertical and diagonal boxed in warm oak, gilded moulding along the bottom chord, leaded stained glass in every truss opening with warm backlight, painted ceiling with leaf ornament above, pastel painted walls with arches, high-backed oak choir stalls along the far wall. |
 | `temple_stasidia.jpg` | (121, 1.6, −258) → (113, 1.6, −262) | Eye-level view across the chapel towards the wall opposite the iconostasis: a row of high-backed arched oak choir stalls with dark stools between groups, white cabinets and a bench against the end wall, painted walls with blue medallion dado and pastel arches, oak-clad columns, red carpet runner, warm interior light. |
+
+## Варианты отделки храма и зал мечети
+
+| Файл | Камера | Что меняется |
+|---|---|---|
+| `temple_finish_white.jpg` … `temple_finish_ceiling.jpg` | та же, что `temple_nave.jpg` (`?finish=white\|wood\|wood_open\|wood_glass\|stucco\|icons\|ceiling`) | отделка колонн и ферм: белая сталь, дуб сплошной с филёнками, дуб по элементам, дуб с витражами, каннелюры с позолотой, колонны-киоты, подшивной расписной потолок |
+| `mosque_hall.jpg` | (30.9, 1.6, −116) → (26.7, 0.7, −121.3) | молитвенный зал с уровня глаз: ковёр, окно, штора-разделитель справа |

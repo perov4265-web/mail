@@ -12,8 +12,11 @@ API = "https://api.gen-api.ru/api/v1"
 MODEL = os.environ.get("GEN_API_MODEL", "nano-banana-2")
 KEY = os.environ["GEN_API_KEY"]
 H = {"Authorization": f"Bearer {KEY}", "Accept": "application/json"}
-PREFIX = ("Turn this 3D model screenshot into a photorealistic render. Keep the exact camera, "
-          "geometry, layout, proportions and positions of every object from the reference image. ")
+PREFIX = ("Turn this 3D model screenshot into a photorealistic render. Keep the exact camera, geometry, layout, "
+          "proportions and positions of every object from the reference image. Do not add anything that is not in the "
+          "reference: no extra buildings, containers, vehicles, machinery, people, text, labels, arrows or logos. "
+          "Coloured zones and lines on the ground are only CAD markings: render them as plain grey asphalt or paving "
+          "with thin white bay lines. ")
 
 root = pathlib.Path(__file__).resolve().parent.parent
 jobs_path = pathlib.Path(sys.argv[1]); only = set(sys.argv[2:])
