@@ -58,7 +58,7 @@
   <label><input type="checkbox" id="cbTruss" checked> Фермы и прогоны АБК-2</label>
   <label>Храм, отделка колонн и ферм: <select id="selFinish">
     <option value="white">1 — как есть: белая окраска</option>
-    <option value="wood">2 — дуб: короба колонн, подшивка поясов</option>
+    <option value="wood" selected>2 — дуб: короба колонн, подшивка поясов (принят)</option>
     <option value="stucco">3 — каннелюры, позолота поясов</option>
     <option value="icons">4 — колонны-киоты с иконами</option>
     <option value="ceiling">5 — подшивной расписной потолок</option>
@@ -195,7 +195,7 @@ function buildOne(abk){
 }
 abks.forEach(buildOne);
 const selFinish = document.getElementById('selFinish');
-const qsF = new URLSearchParams(location.search).get('finish'); if(qsF){ selFinish.value = qsF; }
+const qsF = new URLSearchParams(location.search).get('finish'); if(qsF){ selFinish.value = qsF; } else { selFinish.value = (abks.find(a => a.temple) || {temple:{}}).temple.finish || 'wood'; }
 function applyFinish(){ const abk = abks.find(a => a.temple); if(!abk) return; abk.temple.finish = selFinish.value; buildOne(abk); setRoofs(document.getElementById('cbRoof').checked); setTrusses(document.getElementById('cbTruss').checked); }
 selFinish.addEventListener('change', applyFinish);
 if(qsF) applyFinish();

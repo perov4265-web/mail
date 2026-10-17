@@ -81,7 +81,7 @@ export function buildDetailedBuilding(abk, footprint, opts = {}) {
   });
   // doors: leaf in the opening, shown ajar
   (abk.doors || []).forEach(d => {
-    const wi = info[d.wall]; if (!wi) return;
+    const wi = info[d.wall]; if (!wi || d.opening) return;
     const len = d.to - d.from, h = d.height; const mat = len > 1.2 ? MAT.doorAl : MAT.door;
     const leaf = new THREE.Mesh(new THREE.BoxGeometry(len * 0.98, h - 0.02, 0.045), mat);
     leaf.geometry.translate(len * 0.49, 0, 0); // hinge at local origin
@@ -190,6 +190,9 @@ export function buildDetailedBuilding(abk, footprint, opts = {}) {
   // temple interior (АБК-2 hall): painted walls/ceiling, iconostasis, furniture
   if (abk.temple) {
     const T = Object.assign({wall_h: H}, abk.temple);
+    // openings (doors/passages) in the wall that carries the iconostasis -> the screen is broken there
+    const side = T.altar_side || 'x1'; const wallAt = side === 'x0' ? T.x0 : side === 'x1' ? T.x1 : side === 'y0' ? T.y0 : T.y1; const alongX = side === 'y0' || side === 'y1';
+    T.openings = (abk.doors || []).filter(d => { const r = walls[d.wall].rect; const c = alongX ? (r[1] + r[3]) / 2 : (r[0] + r[2]) / 2; return d.axis === (alongX ? 'x' : 'y') && Math.abs(c - wallAt) < 0.3; }).map(d => [d.from, d.to]);
     if (roof.type === 'gable') { const e = roof.eave, r = roof.ridge; T.topAt = y => e - 0.12 + (r - e) * (1 - Math.abs(y - Ly / 2) / (Ly / 2)); T.chord = roof.bottom_chord || H; T.truss_pitch = (roof.truss && roof.truss.pitch) || 3.1; T.trussMat = g.userData.trussMat; }
     g.add(buildTemple(T));
   }

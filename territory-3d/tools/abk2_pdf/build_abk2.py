@@ -82,7 +82,19 @@ def add_door_y(x,y,w,swing=1):
     if best is None: print('no v-wall at',x,y); return
     doors.append({'wall':best,'from':round(y-w/2,3),'to':round(y+w/2,3),'height':2.1,'axis':'y','leaf':w,'hinge':[round(x,3),round(y-w/2,3)],'swing_to':[round(x+swing*w,3),round(y-w/2,3)]})
 yc=(cor_s+cor_n)/2
-add_door_y(EXT/2,yc,1.5,1); add_door_y(LEN-EXT/2,yc,1.5,-1); add_door_y(EXT+3.1*16,yc+0.2,0.9,1)
+add_door_y(EXT/2,yc,1.5,1); add_door_y(LEN-EXT/2,yc,1.5,-1)
+# hall end walls (axes 12 and 17): corridor runs through -> openings cor_s..cor_n without leaves
+for xe in (hall[0], hall[1]):
+    best=None
+    for i,wl in enumerate(walls):
+        r=wl['rect']
+        if wl['src']=='v' and r[0]-0.8<=xe<=r[2]+0.8 and r[1]<=yc<=r[3]: best=i
+    if best is None:
+        parts=[i for i,wl in enumerate(walls) if wl['src']=='v' and abs((wl['rect'][0]+wl['rect'][2])/2-xe)<0.8]
+        if parts:   # wall is split around the corridor: add a bridging piece that carries the opening (existing walls keep their indices)
+            r0=walls[parts[0]]['rect']; walls.append({'rect':[r0[0],round(cor_s,3),r0[2],round(cor_n,3)],'src':'gap'}); best=len(walls)-1
+    if best is not None:
+        doors.append({'wall':best,'from':round(cor_s+0.05,3),'to':round(cor_n-0.05,3),'height':2.1,'axis':'y','leaf':0,'opening':True})
 add_door_x(EXT+3.1*8+1.6,WID-EXT/2,1.5,-1)
 porches=[{'rect':[-1.5,round(yc-1.2,3),0,round(yc+1.2,3)],'canopy':True,'canopy_h':2.5,'canopy_posts_y':round(yc-1.0,3),'entrance':'ось 1'},
          {'rect':[round(LEN,3),round(yc-1.2,3),round(LEN+1.5,3),round(yc+1.2,3)],'canopy':True,'canopy_h':2.5,'canopy_posts_y':round(yc-1.0,3),'entrance':'ось 20'},
@@ -96,6 +108,7 @@ for side,(yc) in (('S',EXT/2),('N',WID-EXT/2)):
         if wi is None: continue
         r=walls[wi]['rect']
         if r[2]-r[0] < 1.2 or walls[wi]['src']=='gap': continue
+        if hall[0]<xc<hall[1]: continue   # temple hall has no windows (photo survey)
         windows.append({'wall':wi,'from':round(xc-0.5,3),'to':round(xc+0.5,3),'sill':0.9,'head':2.1,'axis':'x'})
 furn=[]
 hall=(EXT+3.1*11, EXT+3.1*16)   # axes 12–17: temple hall
@@ -110,8 +123,8 @@ abk={'id':'ABK-2','name':'Административно-бытовой корп
  'source':'планировка и мебель — «АБК 2 удлинённый V.2.pdf» (растр, оцифровка); фасады, кровля, фермы — «Итог1.pdf» (91VVF)',
  'size_m':[round(LEN,3),round(WID,3)],'levels':{'wall_h':3.0,'window_sill':0.9,'window_head':2.1,'door_h':2.1},'wall_thickness_m':EXT,
  'walls':walls,'windows':windows,'doors':doors,'furniture':furn,'labels':labels,'porches':porches,
- 'temple':{'x0':round(hall[0],3),'x1':round(hall[1],3),'y0':EXT,'y1':round(WID-EXT,3),'sanctuary_depth':3.0,'altar_side':'y1','columns':columns},
- 'roof':{'type':'gable','eave':3.45,'ridge':4.35,'bottom_chord':3.0,'overhang':0.3,'band':{'from':3.45,'to':4.35},'truss':{'pitch':3.1,'member':0.08,'panels':6,'purlins':5,'color':'#f2f1ec'}},
- 'notes':['Оси 12–17 — храм: открытый зал на всю ширину, 8 колонн 200×200 по осям 13–16 на линиях B и C; фермы с равным шагом 3,1 м','Двери кабинетов — по одной в коридорной стене каждого помещения (положение по растру приближённое)','Сетка 20 осей × 3,1 м (58,9 м) × 13,0 м (5,45 + 2,1 + 5,45) — по «Итог1», удлинение по V.2','Стены 110/100 мм, верх стен +3,000, карниз +3,450, конёк +4,350, уклон 0,12 — по разрезу 1-1 «Итог1»','Окантовка кровли — как у АБК-1: сплошной пояс по периметру от +3,45 до +4,35, скаты за ним скрыты','Окна 1000 мм, подоконник +0,900, верх +2,100 — по фасадам «Итог1»; расставлены по одному на пролёт (на растровом плане V.2 окна не показаны)','Планировка, двери и мебель оцифрованы с растрового плана V.2 (точность ≈ ±0,1 м)']}
+ 'temple':{'x0':round(hall[0],3),'x1':round(hall[1],3),'y0':EXT,'y1':round(WID-EXT,3),'sanctuary_depth':5.3,'altar_side':'y1','columns':columns,'finish':'wood'},
+ 'roof':{'type':'gable','eave':3.45,'ridge':4.35,'bottom_chord':3.0,'overhang':0.3,'band':{'from':3.0,'to':4.35},'truss':{'pitch':3.1,'member':0.08,'panels':6,'purlins':5,'color':'#f2f1ec'}},
+ 'notes':['Оси 12–17 — храм: зал на всю ширину без окон (по фото), 8 колонн по осям 13–16 на линиях B и C; иконостас вдоль восточной стены, алтарь 5,3 м (колонны ряда C стоят у кромки солеи — по фото); выходы в коридор в торцах сразу за иконостасом; отделка колонн и поясов — дуб','Двери кабинетов — по одной в коридорной стене каждого помещения (положение по растру приближённое)','Сетка 20 осей × 3,1 м (58,9 м) × 13,0 м (5,45 + 2,1 + 5,45) — по «Итог1», удлинение по V.2','Стены 110/100 мм, верх стен +3,000, карниз +3,450, конёк +4,350, уклон 0,12 — по разрезу 1-1 «Итог1»','Окантовка кровли — как у АБК-1: сплошной пояс по периметру от верха стен +3,00 до конька +4,35, фермы и прогоны снаружи не видны','Окна 1000 мм, подоконник +0,900, верх +2,100 — по фасадам «Итог1»; расставлены по одному на пролёт (на растровом плане V.2 окна не показаны)','Планировка, двери и мебель оцифрованы с растрового плана V.2 (точность ≈ ±0,1 м)']}
 json.dump(abk,open('/home/user/mail/territory-3d/data/abk2.json','w'),ensure_ascii=False,indent=1)
 print('walls',len(walls),'doors',len(doors),'windows',len(windows),'furniture',len(furn),'porches',len(porches))

@@ -126,16 +126,18 @@ function cabinet(w = 1.2) { const g = new THREE.Group(); g.add(box(w, 0.9, 0.45,
 function bench() { const g = new THREE.Group(); g.add(box(1.6, 0.04, 0.35, WOOD, 0, 0.45, 0)); [-0.7, 0.7].forEach(dx => g.add(box(0.05, 0.45, 0.3, WOOD, dx, 0.225, 0))); return g; }
 function stool() { return box(0.5, 0.45, 0.5, DARK, 0, 0.225, 0); }
 
-function iconostasis(width) { // full-width screen: panel base, icon row, cornice, royal doors + two deacon doors with curtains
+function iconostasis(width, gaps = []) { // full-width screen: panel base, icon row, cornice, royal doors + two deacon doors with curtains; `gaps` = [[from,to]] left open
   const g = new THREE.Group(); const H = 2.7;
-  g.add(box(width, 0.95, 0.12, WOOD, width / 2, 0.475, 0));                         // base panels
-  g.add(box(width, 0.12, 0.2, WOOD2, width / 2, H - 0.06, 0));                       // cornice
-  g.add(box(width, 0.06, 0.16, WOOD2, width / 2, 1.0, 0));
+  const inGap = (a, b) => gaps.some(([f, t]) => b > f + 0.02 && a < t - 0.02);
+  // continuous members are split around the gaps
+  let segs = [[0, width]]; gaps.forEach(([f, t]) => { const n = []; segs.forEach(([a, b]) => { if (t <= a || f >= b) n.push([a, b]); else { if (f > a) n.push([a, f]); if (t < b) n.push([t, b]); } }); segs = n; });
+  segs.forEach(([a, b]) => { const w = b - a, c = (a + b) / 2; g.add(box(w, 0.95, 0.12, WOOD, c, 0.475, 0)); g.add(box(w, 0.12, 0.2, WOOD2, c, H - 0.06, 0)); g.add(box(w, 0.06, 0.16, WOOD2, c, 1.0, 0)); });
   const lat = new THREE.MeshLambertMaterial({map: latticeTexture()});
   const n = Math.max(6, Math.round(width / 1.0)); const pw = width / n;
   const mid = Math.floor(n / 2), d1 = Math.max(1, mid - 3), d2 = Math.min(n - 2, mid + 3);
   for (let i = 0; i < n; i++) {
     const cx = (i + 0.5) * pw;
+    if (inGap(i * pw, (i + 1) * pw)) continue;
     if (i === mid || i === mid - 1) { // royal doors (two leaves) with curtain behind
       const leaf = box(pw * 0.95, 1.6, 0.06, lat, cx, 1.8, 0.02); g.add(leaf);
       g.add(box(pw, 1.65, 0.03, RED, cx, 1.85, -0.06));
@@ -225,29 +227,28 @@ export function buildTemple(T) {
   const icU = altarAtU1 ? U1 - T.sanctuary_depth : U0 + T.sanctuary_depth;
   const dir = altarAtU1 ? -1 : 1; // towards the nave along u
   const cv = V0 + Lv / 2;
-  // iconostasis across the full v-width, facing the nave; solea carpet and step in front; altar table behind
-  const ic = iconostasis(Lv); place(ic, icU, altarAtU1 ? V1 : V0, altarAtU1 ? -Math.PI / 2 : Math.PI / 2);
+  // iconostasis along the full v-width of the sanctuary wall, facing the nave; broken at wall openings; solea carpet and step in front
+  const gapsV = (T.openings || []).map(([f, t]) => altarAtU1 ? [f - V0, t - V0] : [V1 - t, V1 - f]);
+  const ic = iconostasis(Lv, gapsV); place(ic, icU, altarAtU1 ? V1 : V0, altarAtU1 ? -Math.PI / 2 : Math.PI / 2);
   const carpet = new THREE.Mesh(new THREE.PlaneGeometry(1.6, Lv - 0.4), new THREE.MeshLambertMaterial({map: carpetTexture()})); carpet.material.map.repeat.set(1, (Lv - 0.4) / 2.5);
   carpet.rotation.x = -Math.PI / 2; carpet.position.set(icU + dir * 0.95, 0.12, -cv); carpet.receiveShadow = true; fg.add(carpet);
   fg.add(box(1.0, 0.1, Lv - 0.4, WOOD2, icU + dir * 0.6, 0.05, -cv));
   fg.add(box(1.0, 1.0, 1.0, RED, icU - dir * T.sanctuary_depth / 2, 0.5, -cv));
-  // stasidia along both side walls of the nave (walls perpendicular to the iconostasis), stools between groups
-  const naveU = altarAtU1 ? [U0 + 0.6, icU - 1.8] : [icU + 1.8, U1 - 0.6];
-  [[V0 + 0.35, 0], [V1 - 0.35, Math.PI]].forEach(([v, ry]) => {
-    let u = naveU[0] + 0.4, k = 0;
-    while (u + 0.35 < naveU[1]) {
-      if (k % 5 === 4) { place(stool(), u, v); u += 0.75; k++; continue; }
-      place(stasidion(), u, v, ry); u += 0.7; k++;
-    }
+  // stasidia along the wall opposite the iconostasis (full length, stools between groups of four) and around the corners onto the end walls
+  const farU = altarAtU1 ? U0 + 0.35 : U1 - 0.35, farRy = altarAtU1 ? Math.PI / 2 : -Math.PI / 2;
+  { let v = V0 + 0.5, k = 0; while (v + 0.35 < V1 - 0.5) { if (k % 5 === 4) { place(stool(), farU, v); v += 0.75; k++; continue; } place(stasidion(), farU, v, farRy); v += 0.7; k++; } }
+  const endRun = altarAtU1 ? [U0 + 1.2, U0 + 3.6] : [U1 - 3.6, U1 - 1.2];
+  [[V0 + 0.35, 0], [V1 - 0.35, Math.PI]].forEach(([v, ry]) => { for (let u = endRun[0]; u < endRun[1]; u += 0.7) place(stasidion(), u, v, ry); });
+  // end walls, nave part: white cabinets with a bench between, exit to the corridor is next to the iconostasis end; Golgotha cross by the cabinet on one side
+  const nearU = altarAtU1 ? icU - 2.0 : icU + 2.0;   // just outside the solea
+  [[V0 + 0.3, Math.PI / 2], [V1 - 0.3, -Math.PI / 2]].forEach(([v, ry], k) => {
+    place(cabinet(1.2), altarAtU1 ? U0 + 4.6 : U1 - 4.6, v, ry); place(cabinet(1.2), altarAtU1 ? U0 + 6.4 : U1 - 6.4, v, ry);
+    place(bench(), altarAtU1 ? U0 + 5.5 : U1 - 5.5, v + (k ? -0.15 : 0.15), 0);
   });
-  // lecterns, candle stands and the Golgotha cross in the nave in front of the solea
-  [[icU + dir * 3.0, cv - 2.2], [icU + dir * 3.0, cv + 2.2], [icU + dir * 5.5, cv]].forEach(([u, v]) => place(lectern(), u, v, altarAtU1 ? Math.PI / 2 : -Math.PI / 2));
-  [[icU + dir * 2.2, cv - 0.9], [icU + dir * 2.2, cv + 0.9], [icU + dir * 6.5, cv - 3.5]].forEach(([u, v]) => place(candleStand(), u, v));
-  place(golgotha(), icU + dir * 1.5, V0 + 0.9, altarAtU1 ? Math.PI / 2 : -Math.PI / 2);
-  // white cabinets and a bench against the wall opposite the iconostasis
-  const farU = altarAtU1 ? U0 + 0.3 : U1 - 0.3;
-  [[farU, cv - 4.0], [farU, cv + 4.0]].forEach(([u, v]) => place(cabinet(1.2), u, v, Math.PI / 2));
-  place(bench(), farU, cv, Math.PI / 2);
+  place(golgotha(), nearU - dir * 1.2, V0 + 0.9, altarAtU1 ? Math.PI / 2 : -Math.PI / 2);
+  // lecterns (analoy) and candle stands in the nave in front of the solea
+  [[icU + dir * 3.0, cv - 2.5], [icU + dir * 3.0, cv + 2.5], [icU + dir * 5.0, cv]].forEach(([u, v]) => place(lectern(), u, v, altarAtU1 ? Math.PI / 2 : -Math.PI / 2));
+  [[icU + dir * 2.2, cv - 1.0], [icU + dir * 2.2, cv + 1.0], [icU + dir * 4.0, V0 + 2.6]].forEach(([u, v]) => place(candleStand(), u, v));
   // interior lighting (no shadows) so the painted room reads under the roof
   for (let i = 1; i <= 3; i++) { const p = new THREE.PointLight(0xfff2dc, 14, 14, 1.4); p.position.set(x0 + Lx * i / 4, 2.9, -(y0 + Ly / 2)); g.add(p); }
   g.userData = {id: 'Храм', name: 'Храм (оси 12–17): иконостас, солея, стасидии, аналои, подсвечники, Голгофа', note: 'Мебель и роспись восстановлены по фотосъёмке; размеры мебели типовые, расстановка — по фото'};
