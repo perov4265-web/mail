@@ -49,106 +49,6 @@
   "runtime": 19.6,
   "saved": true
  },
- "temple_nave": {
-  "request_id": 55901229,
-  "status": "success",
-  "model": "nano-banana-2",
-  "submit": null,
-  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792233809_6ad3515106026.jpg",
-  "cost": 20,
-  "runtime": 19.23,
-  "saved": true
- },
- "temple_trusses": {
-  "request_id": 55901233,
-  "status": "success",
-  "model": "nano-banana-2",
-  "submit": null,
-  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792233808_6ad351506725c.jpg",
-  "cost": 20,
-  "runtime": 15.46,
-  "saved": true
- },
- "temple_stasidia": {
-  "request_id": 55901235,
-  "status": "success",
-  "model": "nano-banana-2",
-  "submit": null,
-  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792233811_6ad3515368f5b.jpg",
-  "cost": 20,
-  "runtime": 17.54,
-  "saved": true
- },
- "temple_finish_white": {
-  "request_id": 55901237,
-  "status": "success",
-  "model": "nano-banana-2",
-  "submit": null,
-  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792233814_6ad35156cdc5f.jpg",
-  "cost": 20,
-  "runtime": 19.04,
-  "saved": true
- },
- "temple_finish_wood": {
-  "request_id": 55901238,
-  "status": "success",
-  "model": "nano-banana-2",
-  "submit": null,
-  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792233813_6ad351557c993.jpg",
-  "cost": 20,
-  "runtime": 15.63,
-  "saved": true
- },
- "temple_finish_wood_open": {
-  "request_id": 55901240,
-  "status": "success",
-  "model": "nano-banana-2",
-  "submit": null,
-  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792233819_6ad3515b5f1d3.jpg",
-  "cost": 20,
-  "runtime": 20.1,
-  "saved": true
- },
- "temple_finish_wood_glass": {
-  "request_id": 55901241,
-  "status": "success",
-  "model": "nano-banana-2",
-  "submit": null,
-  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792233821_6ad3515d53cb7.jpg",
-  "cost": 20,
-  "runtime": 19.42,
-  "saved": true
- },
- "temple_finish_stucco": {
-  "request_id": 55901243,
-  "status": "success",
-  "model": "nano-banana-2",
-  "submit": null,
-  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792233816_6ad35158bd074.jpg",
-  "cost": 20,
-  "runtime": 13.97,
-  "saved": true
- },
- "temple_finish_icons": {
-  "request_id": 55901246,
-  "status": "success",
-  "model": "nano-banana-2",
-  "submit": null,
-  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792233826_6ad35162de1a2.jpg",
-  "cost": 20,
-  "runtime": 22.16,
-  "saved": true
- },
- "temple_finish_ceiling": {
-  "request_id": 55901251,
-  "status": "success",
-  "model": "nano-banana-2",
-  "submit": null,
-  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792233841_6ad3517173251.jpg",
-  "cost": 20,
-  "runtime": 34.58,
-  "saved": true
- },
  "mosque_hall": {
   "request_id": 55901252,
   "status": "success",
@@ -257,6 +157,216 @@
   "url": "https://gen-api.storage.yandexcloud.net/input_files/1792236299_6ad35b0b5540a.jpg",
   "cost": 20,
   "runtime": 19.56,
+  "saved": true
+ },
+ "temple_nave__v1": {
+  "request_id": 55901229,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792233809_6ad3515106026.jpg",
+  "cost": 20,
+  "runtime": 19.23,
+  "saved": true
+ },
+ "temple_trusses__v1": {
+  "request_id": 55901233,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792233808_6ad351506725c.jpg",
+  "cost": 20,
+  "runtime": 15.46,
+  "saved": true
+ },
+ "temple_stasidia__v1": {
+  "request_id": 55901235,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792233811_6ad3515368f5b.jpg",
+  "cost": 20,
+  "runtime": 17.54,
+  "saved": true
+ },
+ "temple_finish_white__v1": {
+  "request_id": 55901237,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792233814_6ad35156cdc5f.jpg",
+  "cost": 20,
+  "runtime": 19.04,
+  "saved": true
+ },
+ "temple_finish_wood__v1": {
+  "request_id": 55901238,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792233813_6ad351557c993.jpg",
+  "cost": 20,
+  "runtime": 15.63,
+  "saved": true
+ },
+ "temple_finish_wood_open__v1": {
+  "request_id": 55901240,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792233819_6ad3515b5f1d3.jpg",
+  "cost": 20,
+  "runtime": 20.1,
+  "saved": true
+ },
+ "temple_finish_wood_glass__v1": {
+  "request_id": 55901241,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792233821_6ad3515d53cb7.jpg",
+  "cost": 20,
+  "runtime": 19.42,
+  "saved": true
+ },
+ "temple_finish_stucco__v1": {
+  "request_id": 55901243,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792233816_6ad35158bd074.jpg",
+  "cost": 20,
+  "runtime": 13.97,
+  "saved": true
+ },
+ "temple_finish_icons__v1": {
+  "request_id": 55901246,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792233826_6ad35162de1a2.jpg",
+  "cost": 20,
+  "runtime": 22.16,
+  "saved": true
+ },
+ "temple_finish_ceiling__v1": {
+  "request_id": 55901251,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792233841_6ad3517173251.jpg",
+  "cost": 20,
+  "runtime": 34.58,
+  "saved": true
+ },
+ "temple_nave": {
+  "request_id": 55903875,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792237029_6ad35de5502c9.jpg",
+  "cost": 20,
+  "runtime": 17.38,
+  "saved": true
+ },
+ "temple_trusses": {
+  "request_id": 55903877,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792237029_6ad35de50f72f.jpg",
+  "cost": 20,
+  "runtime": 15.14,
+  "saved": true
+ },
+ "temple_finish_white": {
+  "request_id": 55903879,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792237032_6ad35de8e9af1.jpg",
+  "cost": 20,
+  "runtime": 16.01,
+  "saved": true
+ },
+ "temple_finish_wood": {
+  "request_id": 55903882,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792237034_6ad35deaa1d15.jpg",
+  "cost": 20,
+  "runtime": 15.72,
+  "saved": true
+ },
+ "temple_finish_wood_open": {
+  "request_id": 55903884,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792237039_6ad35def01c88.jpg",
+  "cost": 20,
+  "runtime": 17.11,
+  "saved": true
+ },
+ "temple_finish_wood_glass": {
+  "request_id": 55903886,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792237043_6ad35df34a7f3.jpg",
+  "cost": 20,
+  "runtime": 19.37,
+  "saved": true
+ },
+ "temple_finish_stucco": {
+  "request_id": 55903890,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792237040_6ad35df0f393f.jpg",
+  "cost": 20,
+  "runtime": 15.05,
+  "saved": true
+ },
+ "temple_finish_icons": {
+  "request_id": 55903894,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792237043_6ad35df3e4425.jpg",
+  "cost": 20,
+  "runtime": 16.01,
+  "saved": true
+ },
+ "temple_finish_ceiling": {
+  "request_id": 55903899,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792237045_6ad35df589c04.jpg",
+  "cost": 20,
+  "runtime": 15.75,
+  "saved": true
+ },
+ "temple_stasidia__v2": {
+  "request_id": 55903878,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792237063_6ad35e0761d25.jpg",
+  "cost": 20,
+  "runtime": 48.51,
+  "saved": true
+ },
+ "temple_stasidia": {
+  "request_id": 55903982,
+  "status": "success",
+  "model": "nano-banana-2",
+  "submit": null,
+  "url": "https://gen-api.storage.yandexcloud.net/input_files/1792237163_6ad35e6b94def.jpg",
+  "cost": 20,
+  "runtime": 15.66,
   "saved": true
  }
 }
