@@ -165,24 +165,27 @@ export function buildTemple(T) {
   floor.material.map.repeat.set(Lx / 1.2, Ly / 1.2); floor.rotation.x = -Math.PI / 2; floor.position.set(x0 + Lx / 2, 0.012, -(y0 + Ly / 2)); floor.receiveShadow = true; g.add(floor);
   // painted walls: inner faces of the four walls (0.02 m inside), long walls up to the ceiling slope, end walls up to the gable line
   const wmLong = new THREE.MeshLambertMaterial({map: wallTexture(Lx, H)}), wmEnd = new THREE.MeshLambertMaterial({map: wallTexture(Ly, H)});
-  const long = (y, flip) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(Lx, H), wmLong); m.position.set(x0 + Lx / 2, H / 2, -y); if (flip) m.rotation.y = Math.PI; m.receiveShadow = true; g.add(m); };
+  const topLine = y => (T.topAt ? T.topAt(y - y0) + 0.08 : H);
+  const Hend = Math.max(topLine(y0), topLine(y0 + Ly / 2), topLine(y1));
+  const wmLongFull = new THREE.MeshLambertMaterial({map: wallTexture(Lx, topLine(y0))}), wmEndFull = new THREE.MeshLambertMaterial({map: wallTexture(Ly, Hend)});
+  // long walls: painted from the floor to the roof line (constant height along the hall)
+  const long = (y, flip) => { const h = topLine(y); const m = new THREE.Mesh(new THREE.PlaneGeometry(Lx, h), wmLongFull); m.position.set(x0 + Lx / 2, h / 2, -y); if (flip) m.rotation.y = Math.PI; m.receiveShadow = true; g.add(m); };
   long(y0 + 0.02, true); long(y1 - 0.02, false);
-  const end = (x, flip) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(Ly, H), wmEnd); m.position.set(x, H / 2, -(y0 + Ly / 2)); m.rotation.y = flip ? -Math.PI / 2 : Math.PI / 2; m.receiveShadow = true; g.add(m); };
+  // end walls: one painted shape from the floor up to the gable, so the cladding reads continuous with the wall
+  const endShape = new THREE.Shape(); endShape.moveTo(0, 0); endShape.lineTo(Ly, 0); endShape.lineTo(Ly, topLine(y1));
+  for (let k = 10; k >= 0; k--) { const yy = y0 + Ly * k / 10; endShape.lineTo(yy - y0, topLine(yy)); } endShape.closePath();
+  wmEndFull.map.repeat.set(1 / Ly, 1 / Hend); wmEndFull.map.wrapS = wmEndFull.map.wrapT = THREE.ClampToEdgeWrapping;
+  const end = (x, flip) => { const m = new THREE.Mesh(new THREE.ShapeGeometry(endShape), wmEndFull); m.rotation.y = flip ? -Math.PI / 2 : Math.PI / 2; m.position.set(x, 0, flip ? -y0 : -y1); m.receiveShadow = true; g.add(m); };
   end(x0 + 0.02, false); end(x1 - 0.02, true);
   const ceil = new THREE.Group(); ceil.name = 'roof'; g.add(ceil);   // toggled together with the building roof
-  if (T.topAt) { // gable fill above the end walls, and the painted ceiling under the roof
+  if (T.topAt) { // painted ceiling under the roof
     const top = y => T.topAt(y - y0) + 0.08;
-    const shp = new THREE.Shape(); shp.moveTo(0, H); shp.lineTo(Ly, H); shp.lineTo(Ly, top(y1)); shp.lineTo(Ly / 2, top(y0 + Ly / 2)); shp.lineTo(0, top(y0)); shp.closePath();
-    const gm = new THREE.MeshLambertMaterial({color: 0xeae3d2, side: THREE.DoubleSide});
-    [x0 + 0.02, x1 - 0.02].forEach(x => { const m = new THREE.Mesh(new THREE.ShapeGeometry(shp), gm); m.rotation.y = -Math.PI / 2; m.position.set(x, 0, -y0); ceil.add(m); });
     const cm = new THREE.MeshLambertMaterial({map: ceilingTexture(), side: THREE.DoubleSide}); cm.map.repeat.set(Lx / 6, Ly / 2 / 6);
     [[y0, y0 + Ly / 2], [y0 + Ly / 2, y1]].forEach(([ya, yb]) => {
       const za = top(ya), zb = top(yb); const len = Math.hypot(yb - ya, zb - za);
       const m = new THREE.Mesh(new THREE.PlaneGeometry(Lx, len), cm); m.position.set(x0 + Lx / 2, (za + zb) / 2, -(ya + yb) / 2);
       m.rotation.x = Math.PI / 2 + Math.atan2(zb - za, yb - ya); ceil.add(m);
     });
-    // strip between the long walls' top and the eave
-    [[y0 + 0.02, 0], [y1 - 0.02, Math.PI]].forEach(([y, ry]) => { const hh = top(y) - H; const m = new THREE.Mesh(new THREE.PlaneGeometry(Lx, hh), gm); m.position.set(x0 + Lx / 2, H + hh / 2, -y); m.rotation.y = ry; ceil.add(m); });
   }
   // columns and trusses: finish variants (T.finish): white | wood | stucco | icons | ceiling
   const F = T.finish || 'white'; const chord = T.chord || H;
@@ -191,7 +194,7 @@ export function buildTemple(T) {
   const marble = new THREE.MeshStandardMaterial({color: 0xcfc6b8, roughness: 0.3, metalness: 0.05});
   (T.columns || []).forEach(([x, y]) => {
     const h = colH(y);
-    if (F === 'wood') {            // oak casing with plinth and capital
+    if (F === 'wood' || F === 'wood_open') {            // oak casing with plinth and capital
       g.add(box(0.32, h, 0.32, WOOD2, x, h / 2, -y)); g.add(box(0.46, 0.3, 0.46, WOOD, x, 0.15, -y)); g.add(box(0.46, 0.18, 0.46, WOOD, x, h - 0.09, -y)); g.add(box(0.4, 0.04, 0.4, GOLD, x, h - 0.2, -y));
     } else if (F === 'icons') {    // oak casing carrying icons on four sides, gilded cornice
       g.add(box(0.36, h, 0.36, WOOD2, x, h / 2, -y)); g.add(box(0.5, 0.25, 0.5, WOOD, x, 0.125, -y)); g.add(box(0.5, 0.12, 0.5, GOLD, x, 2.55, -y));
@@ -206,7 +209,18 @@ export function buildTemple(T) {
   });
   // trusses: positions along the hall at the truss pitch (building grid), bottom chord at `chord`
   const trussX = []; if (T.truss_pitch) { for (let x = 0; x <= x1 + 0.01; x += T.truss_pitch) if (x >= x0 - 0.05 && x <= x1 + 0.05) trussX.push(x); }
-  if (T.trussMat) T.trussMat.color.set(F === 'stucco' ? '#e8dcc0' : F === 'wood' ? '#eee8dc' : '#f2f1ec');
+  if (T.trussMat) T.trussMat.color.set(F === 'stucco' ? '#e8dcc0' : (F === 'wood' || F === 'wood_open') ? '#eee8dc' : '#f2f1ec');
+  if (F === 'wood_open') {   // cladding follows the members: oak boxes around chords, verticals and diagonals; voids stay open
+    const topY = y => (T.topAt ? T.topAt(y - y0) : chord + 0.3) - 0.14;
+    const mem = (p, q, sz = 0.18) => { const a = L(...p), b = L(...q); const len = a.distanceTo(b) + sz; const m = new THREE.Mesh(new THREE.BoxGeometry(sz, sz, len), WOOD2); m.position.copy(a.clone().lerp(b, 0.5)); m.lookAt(b); m.castShadow = true; g.add(m); return m; };
+    const L = (x, y, h) => new THREE.Vector3(x, h, -y);
+    trussX.forEach(x => {
+      mem([x, y0, chord], [x, y1, chord], 0.24); g.add(box(0.3, 0.05, Ly, GOLD, x, chord - 0.145, -(y0 + Ly / 2)));
+      mem([x, y0, topY(y0)], [x, y0 + Ly / 2, topY(y0 + Ly / 2)]); mem([x, y0 + Ly / 2, topY(y0 + Ly / 2)], [x, y1, topY(y1)]);
+      const panels = 6; for (let k = 0; k <= panels; k++) { const y = y0 + Ly * k / panels; if (topY(y) - chord > 0.2) mem([x, y, chord], [x, y, topY(y)], 0.14);
+        if (k < panels) { const y2 = y0 + Ly * (k + 1) / panels; g.add(k % 2 === 0 ? mem([x, y, chord], [x, y2, topY(y2)], 0.12) : mem([x, y, topY(y)], [x, y2, chord], 0.12)); } }
+    });
+  }
   if (F === 'wood' || F === 'stucco') {   // full truss casing: a solid profile from the bottom chord up to the roof, 0.3 m thick, gilded moulding along the bottom edge
     const topY = y => (T.topAt ? T.topAt(y - y0) : chord + 0.3) - 0.02;
     trussX.forEach(x => {

@@ -150,7 +150,7 @@ export function buildDetailedBuilding(abk, footprint, opts = {}) {
     // gable end triangles (wall above the chord)
     const tri = new THREE.Shape(); tri.moveTo(0, 0); tri.lineTo(Ly, 0); tri.lineTo(Ly / 2, ridge - eave); tri.closePath();
     [0, Lx].forEach(x => { const m = new THREE.Mesh(new THREE.ShapeGeometry(tri), new THREE.MeshLambertMaterial({color: 0xe8e4d8, side: THREE.DoubleSide}));
-      m.rotation.y = -Math.PI / 2; m.position.set(x, eave, 0); m.castShadow = true; roofG.add(m); });
+      m.rotation.y = Math.PI / 2; m.position.set(x, eave, 0); m.castShadow = true; roofG.add(m); });   // shape x runs along -z (into the building depth)
     // trusses at a uniform pitch along the length: bottom chord at `chord`, top chord 0.12 m under the sheet, verticals + diagonals
     const t = roof.truss || {}; const pitch = t.pitch || 3.1, mem = t.member || 0.08, off = 0.12;
     const trussMat = t.color ? new THREE.MeshLambertMaterial({color: new THREE.Color(t.color)}) : MAT.steel; g.userData.trussMat = trussMat;
